@@ -1,0 +1,1 @@
+app.jsx is the main thingy that gets components from the componentsl forlder and swapping out those compoinentns for each other with the react DOM (Document Object Model)
