@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { auth } from '../../config/firebase';
+import { Navigate, redirect } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 
 
@@ -11,7 +12,7 @@ export const SignUp = () => {
     const [userCreatedBool, setUserCreatedBool] = useState(false);
 
     if (userCreatedBool) {
-        return <Navigate to="signIn" />
+        return <Navigate to="/signIn" />
     }
 
     const firebaseSignUp = async () => {
