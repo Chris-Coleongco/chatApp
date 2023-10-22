@@ -6,7 +6,9 @@ export const Home = () => {
         <>
         <h1>dis is hom pag</h1>
 
-        <a href='login'>click here to log in</a>
+        <a href='signUp'>click here to sign up</a>
+        <br/>
+        <a href='signIn'>click here to sign in</a>
         </>
     );
 }
