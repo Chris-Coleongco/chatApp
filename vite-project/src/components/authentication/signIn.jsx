@@ -15,7 +15,8 @@ export const SignIn = () => {
         return <Navigate to="/dashboard" />
     }
 
-    const firebaseSignIn = async () => {
+    const firebaseSignIn = async (e) => {
+        e.preventDefault();
         try {
             await signInWithEmailAndPassword(auth, email, password);
             setUserSignedBool(true);
@@ -27,12 +28,12 @@ export const SignIn = () => {
 
     return (
         <div>
-            <h1>Sign In</h1>
-            <input placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
-            <input placeholder="Password" type="password" onChange={(e) => setPassword(e.target.value)} />
-            <button onClick={firebaseSignIn}>Submit</button>
-
-            <p>no account? click <a href='/signUp'>here</a>!</p>
+            <form onSubmit={firebaseSignIn}>
+                <h1>Sign In</h1>
+                <input placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
+                <input placeholder="Password" type="password" onChange={(e) => setPassword(e.target.value)} />
+                <button type='submit'>Submit</button>
+            </form>
         </div>
     
     );

@@ -12,8 +12,6 @@ export const Dashboard = () => {
             <Navigate to="/signIn"/>
         );
     } else {
-        console.log('went to dash')
-        console.log(auth)
         return (
             <>
     
@@ -24,6 +22,11 @@ export const Dashboard = () => {
             <a href='signUp'>click here to sign up</a>
             <br/>
             <a href='signIn'>click here to sign in</a>
+            <br/>
+             show friend list in Dashboard
+             New DMs get shown somehwere
+            <a className="newButtonsAdded" href='/explore'>Explore</a>
+            <a className="newButtonsAdded" href='/settings'>Settings</a>
     
             </div>
     
