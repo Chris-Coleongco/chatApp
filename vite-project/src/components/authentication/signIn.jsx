@@ -31,7 +31,9 @@ export const SignIn = () => {
             <form onSubmit={firebaseSignIn}>
                 <h1>Sign In</h1>
                 <input placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
+                <br/>
                 <input placeholder="Password" type="password" onChange={(e) => setPassword(e.target.value)} />
+                <br/>
                 <button type='submit'>Submit</button>
             </form>
         </div>

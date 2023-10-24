@@ -35,13 +35,7 @@ export const SignUp = () => {
 
     const [stateData, setStateData] = useState([]);
 
-    const states = State.getStatesOfCountry('AF');
-
-    console.log(states);
-
     const [selectedCountry, setSelectedCountry] = useState(null);
-
-    console.log(selectedCountry?.value)
 
     const [selectedState, setSelectedState] = useState(null);
 
@@ -86,8 +80,13 @@ export const SignUp = () => {
                 <br/>
                 <input placeholder="Password" type="password" required onChange={(e) => setPassword(e.target.value)} />
                 <br/>
-                <input placeholder="Full Name" type="password" required onChange={(e) => setPassword(e.target.value)} />
+                <input placeholder="Full Name" required onChange={(e) => setFullName(e.target.value)} />
                 <br/>
+                <Select
+                required
+                options={NEED BIRTHDAY STUFF}
+                onChange={(selectedBday) => setSelectedBday(selectedBday)}
+                />
                 <Select
                 required
                 value={selectedCountry}
@@ -98,7 +97,7 @@ export const SignUp = () => {
                 required
                 value={selectedState}
                 options={stateData.map(state => ({ value: state.isoCode, label: state.name }))}
-                onChange={(selectedState) => setSelectedState(selectedState)}
+                onChange={(selectedState) => setSelectedState(selectedState)} 
                 />
 
                 <button type='submit'>Submit</button>
