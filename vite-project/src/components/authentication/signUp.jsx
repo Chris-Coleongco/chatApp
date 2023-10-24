@@ -7,7 +7,10 @@ import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc, count  } from "firebase/firestore";
 // ! import { getStorage, ref } from "firebase/storage";
 
+
+// selects imports
 import { Country, State, City } from 'country-state-city';
+import DatePicker from 'react-date-picker';
 
 const firebaseConfig = {
     apiKey: "AIzaSyAjZvIcX0bRqNWEM-jwZtQ-EWFEX3HICe8",
@@ -29,6 +32,9 @@ export const SignUp = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [fullName, setFullName] = useState("");
+    const [bday, setBday] = useState("");
+
+    console.log(bday)
     
     const countryData = Country.getAllCountries();
     //console.log(countryData)
@@ -40,10 +46,10 @@ export const SignUp = () => {
     const [selectedState, setSelectedState] = useState(null);
 
     useEffect(() => {
-        console.log(selectedCountry?.value)
+        //console.log(selectedCountry?.value)
         const states = State.getStatesOfCountry(selectedCountry?.value);
         setStateData(states);
-        console.log(states)
+        //console.log(states)
     }, [selectedCountry]);
 
     const [userCreatedBool, setUserCreatedBool] = useState(false);
@@ -58,13 +64,14 @@ export const SignUp = () => {
             const usersDoc = doc(db, "users", uid);
             await setDoc(usersDoc, {
                 fullName : fullName,
+                bday: bday,
                 country : selectedCountry,
                 state : selectedState,
             });
-            console.log('firebase signup executed');
+            //console.log('firebase signup executed');
         } catch (err) {
-            console.error(err);
-            setError(err.message);
+            //console.error(err);
+             return <Navigate to="/signUp" />;
         }
     };
 
@@ -82,11 +89,7 @@ export const SignUp = () => {
                 <br/>
                 <input placeholder="Full Name" required onChange={(e) => setFullName(e.target.value)} />
                 <br/>
-                <Select
-                required
-                options={NEED BIRTHDAY STUFF}
-                onChange={(selectedBday) => setSelectedBday(selectedBday)}
-                />
+                <DatePicker onChange={(bday) => setBday(bday)} />
                 <Select
                 required
                 value={selectedCountry}
