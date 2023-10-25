@@ -7,20 +7,21 @@ import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc, count  } from "firebase/firestore";
 // ! import { getStorage, ref } from "firebase/storage";
 
-
 // selects imports
 import { Country, State, City } from 'country-state-city';
-import DatePicker from 'react-date-picker';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css"
+
 
 const firebaseConfig = {
-    apiKey: "AIzaSyAjZvIcX0bRqNWEM-jwZtQ-EWFEX3HICe8",
-    authDomain: "reactfire-bd1e8.firebaseapp.com",
-    projectId: "reactfire-bd1e8",
-    storageBucket: "reactfire-bd1e8.appspot.com",
-    messagingSenderId: "741275514275",
-    appId: "1:741275514275:web:bcd112476ae1f91839d616",
-    measurementId: "G-97L48GKY1E"
-};
+    apiKey: "AIzaSyC96R1yljmWGA8VwqMDCGhZGk3XXkMHAqw",
+    authDomain: "newtest-31caa.firebaseapp.com",
+    projectId: "newtest-31caa",
+    storageBucket: "newtest-31caa.appspot.com",
+    messagingSenderId: "42832529334",
+    appId: "1:42832529334:web:36270a4fab9c77e60d6317",
+    measurementId: "G-ENTER2CTZ4"
+  };
 
 const firebase = initializeApp(firebaseConfig);
 const db = getFirestore(firebase);
@@ -32,7 +33,7 @@ export const SignUp = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [fullName, setFullName] = useState("");
-    const [bday, setBday] = useState("");
+    const [bday, setBday] = useState(null);
 
     console.log(bday)
     
@@ -65,8 +66,10 @@ export const SignUp = () => {
             await setDoc(usersDoc, {
                 fullName : fullName,
                 bday: bday,
-                country : selectedCountry,
-                state : selectedState,
+                location : {
+                    country : selectedCountry,
+                    state : selectedState,
+                }
             });
             //console.log('firebase signup executed');
         } catch (err) {
@@ -89,7 +92,7 @@ export const SignUp = () => {
                 <br/>
                 <input placeholder="Full Name" required onChange={(e) => setFullName(e.target.value)} />
                 <br/>
-                <DatePicker onChange={(bday) => setBday(bday)} />
+                <DatePicker className='custom-calendar' onChange={(bday) => setBday(bday)} dateFormat="MMMM d, yyyy" />
                 <Select
                 required
                 value={selectedCountry}
@@ -97,7 +100,6 @@ export const SignUp = () => {
                 onChange={(selectedCountry) => setSelectedCountry(selectedCountry)}
                 />
                 <Select
-                required
                 value={selectedState}
                 options={stateData.map(state => ({ value: state.isoCode, label: state.name }))}
                 onChange={(selectedState) => setSelectedState(selectedState)} 

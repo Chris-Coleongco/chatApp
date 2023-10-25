@@ -1,36 +1,35 @@
 import { useState, useEffect } from 'react';
-import { getAuth } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from 'firebase/auth';
 import { Navigate } from 'react-router-dom';
-
-const auth = getAuth;
-const user = auth.currentUser;
-
-// ! get info from current user here (friends list, circles list, profile details, etc)
+import { FriendsList } from './dashboardComponents/friendsList';
 
 export const Dashboard = () => {
 
-    if (user == null) {
-        console.log("went to sign in")
-        return (
-            <Navigate to="/signIn"/>
-        );
-    } else {
-        console.log("went to dashboard")
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (user !== null) {
+    // The user object has basic properties such as display name, email, etc.
+        const displayName = user.displayName;
+        const email = user.email;
+
+        // The user's ID, unique to the Firebase project. Do NOT use
+        // this value to authenticate with your backend server, if
+        // you have one. Use User.getToken() instead.
+        const uid = user.uid;
+
         return (
             <>
-            <div>
-            <h1>Dashboard</h1>
-            <a href='signUp'>click here to sign up</a>
-            <br/>
-            <a href='signIn'>click here to sign in</a>
-            <br/>
-             show friend list in Dashboard
-             New DMs get shown somehwere
-            <a className="newButtonsAdded" href='/explore'>Explore</a>
-            <a className="newButtonsAdded" href='/profile'>Profile (replace this later with user's name)</a>
-            <a className="newButtonsAdded" href='/settings'>Settings</a>
-            </div>
+                <FriendsList/>
             </>
         );
-    } 
+    }
+    else {
+        console.log("no user")
+        return (
+            <>
+                <Navigate to={"/"}/>
+            </>
+        );
+    }
+
 }
