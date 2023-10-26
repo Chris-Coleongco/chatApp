@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { Navigate } from 'react-router-dom';
-import { FriendsList } from './dashboardComponents/friendsList';
+import { FriendsList } from './dashboardComponents/friendRelated/friendsList';
 
 export const Dashboard = () => {
     const auth = getAuth();
