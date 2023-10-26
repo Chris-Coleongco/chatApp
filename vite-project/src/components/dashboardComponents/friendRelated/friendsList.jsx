@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
-
+import { AddFriend } from './addFriend';
 import { FriendReqModal } from './friendRequestModal';
 
 export const FriendsList = ()  => {
@@ -20,6 +20,8 @@ export const FriendsList = ()  => {
         <>
             
             <h3>Friends</h3>
+
+            <AddFriend />
 
             {modalOpen && (
                 <FriendReqModal incomingFriendRequests={firebaseRetrievedFriendRequests} />

@@ -8,7 +8,7 @@ export const FriendReqModal = ({incomingFriendRequests}) => {
             insert friend requests
             {Array.isArray(incomingFriendRequests) && incomingFriendRequests.map((item, index) => (
                 <div key={index}>
-                    <button>{item}</button>
+                    <button onClick={ NEEDS TO COMMUNICATE WITH DATABASE TO ACCEPT OR DENY FRIEND REQUESTS }>{item}</button>
                 </div>
             ))}
         </div>
