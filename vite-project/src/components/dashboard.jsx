@@ -1,35 +1,33 @@
 import { useState, useEffect } from 'react';
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { Navigate } from 'react-router-dom';
 import { FriendsList } from './dashboardComponents/friendsList';
 
 export const Dashboard = () => {
-
     const auth = getAuth();
-    const user = auth.currentUser;
-    if (user !== null) {
-    // The user object has basic properties such as display name, email, etc.
-        const displayName = user.displayName;
-        const email = user.email;
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
-        // The user's ID, unique to the Firebase project. Do NOT use
-        // this value to authenticate with your backend server, if
-        // you have one. Use User.getToken() instead.
-        const uid = user.uid;
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log('user is currently logged in');
+                setIsAuthenticated(true);
+            } else {
+                console.log('no user');
+            }
+            setIsLoading(false);
+        });
+        return unsubscribe;
+    }, [auth]);
 
-        return (
-            <>
-                <FriendsList/>
-            </>
-        );
-    }
-    else {
-        console.log("no user")
-        return (
-            <>
-                <Navigate to={"/"}/>
-            </>
-        );
+    if (isLoading) {
+        return <p>Loading...</p>; // Display a loading indicator while checking the authentication state
     }
 
-}
+    if (!isAuthenticated) {
+        return <Navigate to={'/'} />;
+    } else {
+        return <FriendsList />;
+    }
+};
