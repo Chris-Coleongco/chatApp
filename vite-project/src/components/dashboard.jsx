@@ -6,12 +6,18 @@ import { FriendsList } from './dashboardComponents/friendRelated/friendsList';
 export const Dashboard = () => {
     const auth = getAuth();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+    const [userUID, setUserUID] = useState(null);
+
     const [isLoading, setIsLoading] = useState(true);
+    
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
                 console.log('user is currently logged in');
+                console.log(user)
+                setUserUID(user.uid)
                 setIsAuthenticated(true);
             } else {
                 console.log('no user');
@@ -28,6 +34,6 @@ export const Dashboard = () => {
     if (!isAuthenticated) {
         return <Navigate to={'/'} />;
     } else {
-        return <FriendsList />;
+        return <FriendsList userUID={userUID}/>;
     }
 };

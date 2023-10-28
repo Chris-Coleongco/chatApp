@@ -4,7 +4,7 @@ import { auth } from '../../config/firebase';
 import { Navigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, setDoc, count  } from "firebase/firestore";
+import { getFirestore, doc, setDoc,  } from "firebase/firestore";
 // ! import { getStorage, ref } from "firebase/storage";
 
 // selects imports
@@ -69,7 +69,9 @@ export const SignUp = () => {
                 location : {
                     country : selectedCountry,
                     state : selectedState,
-                }
+                },
+                friends : {},
+                incomingRequests : {}
             });
             //console.log('firebase signup executed');
         } catch (err) {
