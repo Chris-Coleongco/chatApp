@@ -71,8 +71,11 @@ export const SignUp = () => {
                     state : selectedState,
                 },
                 friends : {},
-                incomingRequests : {}
+                incomingFriendRequests : {},
             });
+
+           //  const newRef = collection(usersDoc, "pendingFriendRequests")
+            // await addDoc(newRef, {})
             //console.log('firebase signup executed');
         } catch (err) {
             //console.error(err);

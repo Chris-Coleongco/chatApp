@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AddFriend } from './addFriend';
 import { FriendReqModal } from './friendRequestModal';
-import { getFirestore, collection, doc, getDoc, query, where } from "firebase/firestore";
+import { getFirestore, collection, doc, getDoc, getDocs, query, where, updateDoc, addDoc } from "firebase/firestore";
 import { initializeApp } from "firebase/app";
 
 // ! import { getStorage, ref } from "firebase/storage";
@@ -28,7 +28,8 @@ export const FriendsList = ({userUID})  => {
 
     // code to retrieve friends uids from user collection
 
-    const [userData, setUserData] = useState(null) 
+    const [userData, setUserData] = useState(null)
+    
 
     useEffect( () => {
         
@@ -49,15 +50,47 @@ export const FriendsList = ({userUID})  => {
         
         return fetchData;
 
-    }, [db, userUID])
+    }, [userUID])
+
+    const [friendRequestSearchBuffer, setFriendRequestSearchBuffer] = useState("");
+    
+ //   useEffect(() => {
+  //      console.log('Data:', friendRequestSearchBuffer);
+
+        // ! this is where to implement live search for friend requests
+        
+ //   }
+
+   // }, [friendRequestSearchBuffer]);
 
 
 // ! ALL DATABASE LOGIC FOR FRIEND STUFF GOES IN THIS FILE
 
+    const pushData = async () => {
+        const usersDoc = doc(db, "users", userUID);
 
+        const existingFriendCheck = await getDoc(doc(usersDoc, "friends", friendRequestSearchBuffer))
+
+        const existingFriendCheckData = existingFriendCheck.data()
+
+        console.log(typeof existingFriendCheck.data())
+
+        if (existingFriendCheckData === undefined) {
+            const newRef = collection(usersDoc, "pendingFriendRequests")
+        await addDoc(newRef, {
+            requester: userUID,
+            requested: friendRequestSearchBuffer
+        })
+        } 
+        else {
+            return null;
+        }
+        
+        //else if (existingFriendsData)
+
+        
+    }
     //console.log(friendsListReference)
-
-    console.log(userData)
 
     //const friendsRequestReference = collection()
 
@@ -75,7 +108,14 @@ export const FriendsList = ({userUID})  => {
             
             <h3>Friends</h3>
 
-            <AddFriend />
+            <div className='addFriendSearch'>
+            <input type='search' onChange={(e) => setFriendRequestSearchBuffer(e.target.value)}/>
+            <button onClick={pushData}>Add Friend</button>
+            <br/>
+
+            NEED TO HAVE LIVE SEARCH HERE
+            
+            </div>
 
             {modalOpen && (
                 <FriendReqModal incomingFriendRequests={firebaseRetrievedFriendRequests} />

@@ -1,15 +1,19 @@
 import { useState, useEffect } from 'react';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { Navigate } from 'react-router-dom';
 import { FriendsList } from './dashboardComponents/friendRelated/friendsList';
+import { Settings } from './dashboardComponents/settings';
 
 export const Dashboard = () => {
+
     const auth = getAuth();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     const [userUID, setUserUID] = useState(null);
 
     const [isLoading, setIsLoading] = useState(true);
+
+
     
 
     useEffect(() => {
@@ -32,8 +36,22 @@ export const Dashboard = () => {
     }
 
     if (!isAuthenticated) {
-        return <Navigate to={'/'} />;
+        
+        return (
+            <Navigate to={'/'} />
+        );
+
     } else {
-        return <FriendsList userUID={userUID}/>;
+
+        return (
+        
+            <>
+                <FriendsList userUID={userUID}/>
+            
+                <Settings/>
+            </>
+            
+        
+        );
     }
 };
