@@ -84,7 +84,6 @@ export const SignUp = () => {
                     state : selectedState,
                 },
                 friends : {},
-                incomingFriendRequests : {},
             });
 
            //  const newRef = collection(usersDoc, "pendingFriendRequests")

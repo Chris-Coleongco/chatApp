@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AddFriend } from './addFriend';
 import { FriendReqModal } from './friendRequestModal';
-import { getFirestore, collection, doc, getDoc, getDocs, query, where, updateDoc, addDoc } from "firebase/firestore";
+import { getFirestore, collection, onSnapshot, doc, getDoc, getDocs, query, where, updateDoc, addDoc } from "firebase/firestore";
 import { initializeApp } from "firebase/app";
 
 // ! import { getStorage, ref } from "firebase/storage";
@@ -29,22 +29,49 @@ export const FriendsList = ({userUID})  => {
     // code to retrieve friends uids from user collection
 
     const [friendRequestSearchBuffer, setFriendRequestSearchBuffer] = useState("");
+
+    // for getting possible users to frined request in live search
     const [firebaseRetrievedPeopleList, setFirebaseRetrievedPeopleList] = useState([]);
+
+    const firebaseRetrievedFriendsList = ['Item1', 'Item2', 'item3']
+    const [firebaseRetrievedFriendRequests, setfirebaseRetrievedFriendRequests] = useState("")
+
+// ! THIS IS WHERE TO DO THE UPDATING OF FRIENDS LIST
+
+// retrieve incoming friendrequests
 
     useEffect(() => {
 
-        
+        const fetchIncomingFriendData = async () => {
 
-   }, [friendRequestSearchBuffer]);
+            //usersDoc
+
+            const usersDoc = onSnapshot(doc(db, "users", userUID), (doc) => {
+                const usersFriends = doc.get('friends')
+                console.log(usersFriends)
+                setfirebaseRetrievedFriendRequests(usersFriends)
+            })
+
+            return usersDoc;
+
+         }
+
+         fetchIncomingFriendData()
+
+   }, []);
 
 
 // ! ALL DATABASE LOGIC FOR FRIEND STUFF GOES IN THIS FILE
+
+   
 
     const pushData = async () => {
 
         const usersDoc = doc(db, "users", userUID);
 
-        const existingPersonCheck = await getDoc(doc(db, "users", friendRequestSearchBuffer));
+        const personDoc = doc(db, "users", friendRequestSearchBuffer)
+
+        const existingPersonCheck = await getDoc(personDoc);
 
         console.log(typeof existingPersonCheck.data())
 
@@ -57,12 +84,18 @@ export const FriendsList = ({userUID})  => {
         console.log(typeof existingFriendCheck.data())
 
         if (existingFriendCheckData === undefined && existingPersonCheckData !== undefined) {
-            const newRef = collection(usersDoc, "pendingFriendRequests")
-        await addDoc(newRef, {
-            requester: userUID,
-            requested: friendRequestSearchBuffer
-        })
-        } 
+            const userRef = collection(usersDoc, "pendingFriendRequests")
+            await addDoc(userRef, {
+                requester: userUID,
+                requested: friendRequestSearchBuffer
+            })
+            const personRef = collection(usersDoc, "incomingFriendRequests")
+            await addDoc(personRef, {
+                requester: userUID,
+                requested: friendRequestSearchBuffer
+            })
+
+        }
         else {
             return null;
         }
@@ -77,9 +110,7 @@ export const FriendsList = ({userUID})  => {
 
     const [modalOpen, setModalOpen] = useState(false);
 
-    const firebaseRetrievedFriendsList = ['Item1', 'Item2', 'item3']
 
-    const firebaseRetrievedFriendRequests = ['john', 'ass', 'pee']
 
     console.log(modalOpen)
 
