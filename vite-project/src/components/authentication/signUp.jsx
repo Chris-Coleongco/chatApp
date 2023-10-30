@@ -27,12 +27,24 @@ const firebase = initializeApp(firebaseConfig);
 const db = getFirestore(firebase);
 // ! const storage = getStorage(firebase)
 // ! const storageRef = ref(storage, 'profilePictures');
+const genderChoices = ['male', 'female', 'other']
+
+
+const selectStyles = {
+    option: (provided, state) => ({
+      ...provided,
+      color: state.isSelected ? 'white' : 'black',
+    }),
+  }
+
+
 
 export const SignUp = () => {
 
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [fullName, setFullName] = useState("");
+    const [email, setEmail] = useState(null);
+    const [password, setPassword] = useState(null);
+    const [fullName, setFullName] = useState(null);
+    const [selectedGender, setSelectedGender] = useState(null);
     const [bday, setBday] = useState(null);
 
     console.log(bday)
@@ -65,6 +77,7 @@ export const SignUp = () => {
             const usersDoc = doc(db, "users", uid);
             await setDoc(usersDoc, {
                 fullName : fullName,
+                gender : selectedGender,
                 bday: bday,
                 location : {
                     country : selectedCountry,
@@ -97,17 +110,27 @@ export const SignUp = () => {
                 <br/>
                 <input placeholder="Full Name" required onChange={(e) => setFullName(e.target.value)} />
                 <br/>
-                <DatePicker className='custom-calendar' onChange={(bday) => setBday(bday)} dateFormat="MMMM d, yyyy" />
+                <Select
+                required
+                value={selectedGender}
+                options={genderChoices.map(gender => ({value: gender}))}
+                onChange={(selectedGender) => setSelectedGender(selectedGender)}
+                styles={selectStyles}
+                />
+                <br/>
+                <DatePicker className='custom-calendar' selected={bday} onChange={(bday) => setBday(bday)} dateFormat="MMMM d, yyyy" />
                 <Select
                 required
                 value={selectedCountry}
                 options={countryData.map(country => ({ value: country.isoCode, label: country.name }))}
                 onChange={(selectedCountry) => setSelectedCountry(selectedCountry)}
+                styles={selectStyles}
                 />
                 <Select
                 value={selectedState}
                 options={stateData.map(state => ({ value: state.isoCode, label: state.name }))}
                 onChange={(selectedState) => setSelectedState(selectedState)} 
+                styles={selectStyles}
                 />
 
                 <button type='submit'>Submit</button>

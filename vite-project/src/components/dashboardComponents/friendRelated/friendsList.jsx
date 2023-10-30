@@ -28,54 +28,35 @@ export const FriendsList = ({userUID})  => {
 
     // code to retrieve friends uids from user collection
 
-    const [userData, setUserData] = useState(null)
-    
-
-    useEffect( () => {
-        
-        const fetchData = async () => {
-            console.log(userUID)
-        
-            const userDocRef  = doc(db,  'users', userUID)
-
-            console.log(userDocRef)
-
-            const userInfo = await (await getDoc(userDocRef)).data()
-
-            setUserData(userInfo)
-
-        }
-        
-        fetchData();
-        
-        return fetchData;
-
-    }, [userUID])
-
     const [friendRequestSearchBuffer, setFriendRequestSearchBuffer] = useState("");
-    
- //   useEffect(() => {
-  //      console.log('Data:', friendRequestSearchBuffer);
+    const [firebaseRetrievedPeopleList, setFirebaseRetrievedPeopleList] = useState([]);
 
-        // ! this is where to implement live search for friend requests
+    useEffect(() => {
+
         
- //   }
 
-   // }, [friendRequestSearchBuffer]);
+   }, [friendRequestSearchBuffer]);
 
 
 // ! ALL DATABASE LOGIC FOR FRIEND STUFF GOES IN THIS FILE
 
     const pushData = async () => {
+
         const usersDoc = doc(db, "users", userUID);
+
+        const existingPersonCheck = await getDoc(doc(db, "users", friendRequestSearchBuffer));
+
+        console.log(typeof existingPersonCheck.data())
 
         const existingFriendCheck = await getDoc(doc(usersDoc, "friends", friendRequestSearchBuffer))
 
         const existingFriendCheckData = existingFriendCheck.data()
 
+        const existingPersonCheckData = existingPersonCheck.data()
+
         console.log(typeof existingFriendCheck.data())
 
-        if (existingFriendCheckData === undefined) {
+        if (existingFriendCheckData === undefined && existingPersonCheckData !== undefined) {
             const newRef = collection(usersDoc, "pendingFriendRequests")
         await addDoc(newRef, {
             requester: userUID,
@@ -111,6 +92,15 @@ export const FriendsList = ({userUID})  => {
             <div className='addFriendSearch'>
             <input type='search' onChange={(e) => setFriendRequestSearchBuffer(e.target.value)}/>
             <button onClick={pushData}>Add Friend</button>
+            <div id='peopleList'>
+                {firebaseRetrievedPeopleList.map((item, index) => (
+                    <div key={index}>
+
+                        <h5>{item}</h5>
+
+                    </div>
+                ))}
+            </div>
             <br/>
 
             NEED TO HAVE LIVE SEARCH HERE
