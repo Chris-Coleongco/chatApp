@@ -33,32 +33,38 @@ export const FriendsList = ({userUID})  => {
     // for getting possible users to frined request in live search
     const [firebaseRetrievedPeopleList, setFirebaseRetrievedPeopleList] = useState([]);
 
-    const firebaseRetrievedFriendsList = ['Item1', 'Item2', 'item3']
-    const [firebaseRetrievedFriendRequests, setfirebaseRetrievedFriendRequests] = useState("")
+    const [firebaseRetrievedFriends , setFirebaseRetrievedFriends] = useState({})
 
-// ! THIS IS WHERE TO DO THE UPDATING OF FRIENDS LIST
+    const [firebaseRetrievedFriendRequests , setFirebaseRetrievedFriendRequests] = useState([])
 
-// retrieve incoming friendrequests
-
+    
     useEffect(() => {
 
-        const fetchIncomingFriendData = async () => {
+        const fetchFriendData = async () => {
 
             //usersDoc
 
             const usersDoc = onSnapshot(doc(db, "users", userUID), (doc) => {
+
                 const usersFriends = doc.get('friends')
-                console.log(usersFriends)
-                setfirebaseRetrievedFriendRequests(usersFriends)
+
+                // ! YOU CAN USE THIS FUNCTION TO RETRIEVE INCOMING REQUESTS
+                //console.log(usersFriends['friend'])
+                setFirebaseRetrievedFriends(usersFriends)
+
             })
 
             return usersDoc;
 
          }
 
-         fetchIncomingFriendData()
-
+        fetchFriendData()
+         
    }, []);
+
+   useEffect(() => {
+        console.log(firebaseRetrievedFriends)
+   }, [firebaseRetrievedFriends])
 
 
 // ! ALL DATABASE LOGIC FOR FRIEND STUFF GOES IN THIS FILE
@@ -147,15 +153,16 @@ export const FriendsList = ({userUID})  => {
 
             </div>
 
+            MY FRIENDS:
+
             <div>
 
-                {firebaseRetrievedFriendsList.map((item, index) => (
+                {Object.keys(firebaseRetrievedFriends).map((friend, index) => (
                     <div key={index}>
-
-                        <h5>{item}</h5>
-
+                        <h5>{firebaseRetrievedFriends[friend]}</h5>
                     </div>
                 ))}
+                
 
             </div>
 
