@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AddFriend } from './addFriend';
 import { FriendReqModal } from './friendRequestModal';
-import { getFirestore, collection, onSnapshot, doc, getDoc, getDocs, query, where, updateDoc, addDoc, QuerySnapshot, setDoc } from "firebase/firestore";
+import { getFirestore, collection, onSnapshot, doc, getDoc, getDocs, query, where, updateDoc, addDoc, QuerySnapshot, setDoc, deleteField, deleteDoc } from "firebase/firestore";
 import { initializeApp } from "firebase/app";
 import { setDefaultEventParameters } from 'firebase/analytics';
 
@@ -78,15 +78,15 @@ export const FriendsList = ({userUID})  => {
 
 // ! ALL DATABASE LOGIC FOR FRIEND STUFF GOES IN THIS FILE
 
-   
 
-    const pushData = async () => {
+
+    const pushRequestsData = async () => {
 
         const usersDoc = doc(db, "users", userUID);
 
-        const personDoc = doc(db, "users", friendRequestSearchBuffer)
+        const personsDoc = doc(db, "users", friendRequestSearchBuffer)
 
-        const existingPersonCheck = await getDoc(personDoc);
+        const existingPersonCheck = await getDoc(personsDoc);
 
         console.log(typeof existingPersonCheck.data())
 
@@ -104,28 +104,24 @@ export const FriendsList = ({userUID})  => {
 
             try {
                 await updateDoc(usersDoc, {
-                    pendingFriendRequests : {
-                        friendRequestSearchBuffer: friendRequestSearchBuffer
-                    }
-                })
+                    [`pendingFriendRequests.${friendRequestSearchBuffer}`]: friendRequestSearchBuffer
+                }, { merge: true })
             } catch (error) {
-                await updateDoc(usersDoc, {
+                await setDoc(usersDoc, {
                     pendingFriendRequests : {
-                        friendRequestSearchBuffer: friendRequestSearchBuffer
+                        [friendRequestSearchBuffer]: friendRequestSearchBuffer
                     }
                 })
             }
 
             try {
-                await updateDoc(personDoc, {
-                    incomingFriendRequests : {
-                        userUID: userUID
-                    }
-                })
+                await updateDoc(personsDoc, {
+                    [`incomingFriendRequests.${userUID}`]: userUID
+                }, { merge: true })
             } catch (error) {
-                await setDoc(personDoc, {
+                await setDoc(personsDoc, {
                     incomingFriendRequests : {
-                        userUID: userUID
+                        [userUID]: userUID
                     }
                 })
             }
@@ -138,6 +134,45 @@ export const FriendsList = ({userUID})  => {
         //else if (existingFriendsData)
 
         
+    }
+
+
+    const acceptFriendRequest = async (evt) => {
+
+        console.log(userUID)
+
+        const usersDoc = doc(db, "users", userUID);
+
+         // GET THE UID OF THE REQUESTER FROM THE USER FIELD 
+        
+        
+        const buttonValue = evt.target.value;
+
+        const personsDoc = doc(db, "users", buttonValue)
+
+        console.log(buttonValue)
+
+        await updateDoc(usersDoc, {
+            friends : {
+                [buttonValue]: buttonValue
+            },
+        },  { merge: true })
+
+        // !!!!!!!! FIX THE DELETION
+        const deeperUsersDoc = doc(usersDoc, 'incomingFriendRequests', buttonValue)
+
+       deleteDoc(deeperUsersDoc)
+// !!!!!!!! THIS DOESNT WORK
+        await updateDoc(personsDoc, {
+            friends : {
+                [userUID]: userUID
+            },
+        },  { merge: true })
+// !!!!!!!! FIX THE DELETION
+        const deeperPersonsDoc = doc(personsDoc, 'pendingFriendRequests', userUID)
+
+        deleteDoc(deeperPersonsDoc)
+// !!!!!!!! THIS DOESNT WORK
     }
     //console.log(friendsListReference)
 
@@ -157,7 +192,7 @@ export const FriendsList = ({userUID})  => {
 
             <div className='addFriendSearch'>
             <input type='search' onChange={(e) => setFriendRequestSearchBuffer(e.target.value)}/>
-            <button onClick={pushData}>Add Friend</button>
+            <button onClick={pushRequestsData}>Add Friend</button>
             <div id='peopleList'>
                 {firebaseRetrievedPeopleList.map((item, index) => (
                     <div key={index}>
@@ -176,12 +211,15 @@ export const FriendsList = ({userUID})  => {
             INCOMING FRIEND REQUETSS:
 
             <div>
-
-                {Object.keys(firebaseRetrievedFriendRequests).map((requester, index) => (
-                    <div key={index}>
-                        <h5>{firebaseRetrievedFriendRequests[requester]}</h5>
-                    </div>
-                ))}
+                {firebaseRetrievedFriendRequests && 
+                    Object.keys(firebaseRetrievedFriendRequests).map((requester, index) => (
+                        <div key={index}>
+                            <h5>{firebaseRetrievedFriendRequests[requester]}</h5>
+                            <button value={firebaseRetrievedFriendRequests[requester]} onClick={acceptFriendRequest}>Accept</button>
+                        </div>
+                    ))    
+                }
+                
                 
 
             </div>
@@ -190,7 +228,7 @@ export const FriendsList = ({userUID})  => {
 
             <div>
 
-                {Object.keys(firebaseRetrievedFriends).map((friend, index) => (
+                {firebaseRetrievedFriends && Object.keys(firebaseRetrievedFriends).map((friend, index) => (
                     <div key={index}>
                         <h5>{firebaseRetrievedFriends[friend]}</h5>
                     </div>
