@@ -1,7 +1,24 @@
 import { useState } from "react";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { Navigate } from "react-router-dom";
+import { getFirestore, collection, onSnapshot, doc, getDoc, getDocs, query, where, updateDoc, addDoc } from "firebase/firestore";
+import { initializeApp } from "firebase/app";
 
+
+const firebaseConfig = {
+    apiKey: "AIzaSyAjZvIcX0bRqNWEM-jwZtQ-EWFEX3HICe8",
+    authDomain: "reactfire-bd1e8.firebaseapp.com",
+    projectId: "reactfire-bd1e8",
+    storageBucket: "reactfire-bd1e8.appspot.com",
+    messagingSenderId: "741275514275",
+    appId: "1:741275514275:web:bcd112476ae1f91839d616",
+    measurementId: "G-97L48GKY1E"
+  };
+
+const firebase = initializeApp(firebaseConfig);
+const db = getFirestore(firebase);
+
+//! NEED TO ADD AN ONLINE STATUS
 
 export const SignIn = () =>  {
     const [email, setEmail] = useState("");
@@ -17,6 +34,8 @@ export const SignIn = () =>  {
         signInWithEmailAndPassword(auth, email, password).then((userCredential) => {
         // Signed in 
         setUserSignedIn(true);
+        const doc = doc(db, "users", userUID)
+        const usersFriends = doc.get('friends')
         console.log('sign in')
         const user = userCredential.user;
         console.log(user)
@@ -42,6 +61,8 @@ export const SignIn = () =>  {
                 <br/>
                 <button type="submit">click to log in</button>
             </form>
+
+            <a href="/signUp">dont have an account? sign up here!</a>
         </>
     );
   }

@@ -2,20 +2,21 @@ import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AddFriend } from './addFriend';
 import { FriendReqModal } from './friendRequestModal';
-import { getFirestore, collection, onSnapshot, doc, getDoc, getDocs, query, where, updateDoc, addDoc } from "firebase/firestore";
+import { getFirestore, collection, onSnapshot, doc, getDoc, getDocs, query, where, updateDoc, addDoc, QuerySnapshot, setDoc } from "firebase/firestore";
 import { initializeApp } from "firebase/app";
+import { setDefaultEventParameters } from 'firebase/analytics';
 
 // ! import { getStorage, ref } from "firebase/storage";
 
 
 const firebaseConfig = {
-    apiKey: "AIzaSyC96R1yljmWGA8VwqMDCGhZGk3XXkMHAqw",
-    authDomain: "newtest-31caa.firebaseapp.com",
-    projectId: "newtest-31caa",
-    storageBucket: "newtest-31caa.appspot.com",
-    messagingSenderId: "42832529334",
-    appId: "1:42832529334:web:36270a4fab9c77e60d6317",
-    measurementId: "G-ENTER2CTZ4"
+    apiKey: "AIzaSyAjZvIcX0bRqNWEM-jwZtQ-EWFEX3HICe8",
+    authDomain: "reactfire-bd1e8.firebaseapp.com",
+    projectId: "reactfire-bd1e8",
+    storageBucket: "reactfire-bd1e8.appspot.com",
+    messagingSenderId: "741275514275",
+    appId: "1:741275514275:web:bcd112476ae1f91839d616",
+    measurementId: "G-97L48GKY1E"
   };
 
 const firebase = initializeApp(firebaseConfig);
@@ -37,7 +38,7 @@ export const FriendsList = ({userUID})  => {
 
     const [firebaseRetrievedFriendRequests , setFirebaseRetrievedFriendRequests] = useState([])
 
-    
+
     useEffect(() => {
 
         const fetchFriendData = async () => {
@@ -47,10 +48,14 @@ export const FriendsList = ({userUID})  => {
             const usersDoc = onSnapshot(doc(db, "users", userUID), (doc) => {
 
                 const usersFriends = doc.get('friends')
-
                 // ! YOU CAN USE THIS FUNCTION TO RETRIEVE INCOMING REQUESTS
                 //console.log(usersFriends['friend'])
+
                 setFirebaseRetrievedFriends(usersFriends)
+
+                const usersIncomingFriendRequests = doc.get('incomingFriendRequests')
+                
+                setFirebaseRetrievedFriendRequests(usersIncomingFriendRequests)
 
             })
 
@@ -62,10 +67,14 @@ export const FriendsList = ({userUID})  => {
          
    }, []);
 
+   
    useEffect(() => {
         console.log(firebaseRetrievedFriends)
    }, [firebaseRetrievedFriends])
 
+   useEffect(() => {
+    console.log(firebaseRetrievedFriendRequests)
+   }, [firebaseRetrievedFriendRequests])
 
 // ! ALL DATABASE LOGIC FOR FRIEND STUFF GOES IN THIS FILE
 
@@ -90,16 +99,36 @@ export const FriendsList = ({userUID})  => {
         console.log(typeof existingFriendCheck.data())
 
         if (existingFriendCheckData === undefined && existingPersonCheckData !== undefined) {
-            const userRef = collection(usersDoc, "pendingFriendRequests")
-            await addDoc(userRef, {
-                requester: userUID,
-                requested: friendRequestSearchBuffer
-            })
-            const personRef = collection(usersDoc, "incomingFriendRequests")
-            await addDoc(personRef, {
-                requester: userUID,
-                requested: friendRequestSearchBuffer
-            })
+
+            //doc(usersDoc, "friends",)
+
+            try {
+                await updateDoc(usersDoc, {
+                    pendingFriendRequests : {
+                        friendRequestSearchBuffer: friendRequestSearchBuffer
+                    }
+                })
+            } catch (error) {
+                await updateDoc(usersDoc, {
+                    pendingFriendRequests : {
+                        friendRequestSearchBuffer: friendRequestSearchBuffer
+                    }
+                })
+            }
+
+            try {
+                await updateDoc(personDoc, {
+                    incomingFriendRequests : {
+                        userUID: userUID
+                    }
+                })
+            } catch (error) {
+                await setDoc(personDoc, {
+                    incomingFriendRequests : {
+                        userUID: userUID
+                    }
+                })
+            }
 
         }
         else {
@@ -144,12 +173,16 @@ export const FriendsList = ({userUID})  => {
             
             </div>
 
-            {modalOpen && (
-                <FriendReqModal incomingFriendRequests={firebaseRetrievedFriendRequests} />
-            )}
+            INCOMING FRIEND REQUETSS:
 
             <div>
-                <button onClick={() => setModalOpen(!modalOpen)}>notifications</button>
+
+                {Object.keys(firebaseRetrievedFriendRequests).map((requester, index) => (
+                    <div key={index}>
+                        <h5>{firebaseRetrievedFriendRequests[requester]}</h5>
+                    </div>
+                ))}
+                
 
             </div>
 

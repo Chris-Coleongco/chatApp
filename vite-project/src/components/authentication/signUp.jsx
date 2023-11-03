@@ -4,7 +4,8 @@ import { auth } from '../../config/firebase';
 import { Navigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, setDoc,  } from "firebase/firestore";
+import { getFirestore, doc, setDoc, addDoc,  collection} from "firebase/firestore";
+
 // ! import { getStorage, ref } from "firebase/storage";
 
 // selects imports
@@ -14,13 +15,13 @@ import "react-datepicker/dist/react-datepicker.css"
 
 
 const firebaseConfig = {
-    apiKey: "AIzaSyC96R1yljmWGA8VwqMDCGhZGk3XXkMHAqw",
-    authDomain: "newtest-31caa.firebaseapp.com",
-    projectId: "newtest-31caa",
-    storageBucket: "newtest-31caa.appspot.com",
-    messagingSenderId: "42832529334",
-    appId: "1:42832529334:web:36270a4fab9c77e60d6317",
-    measurementId: "G-ENTER2CTZ4"
+    apiKey: "AIzaSyAjZvIcX0bRqNWEM-jwZtQ-EWFEX3HICe8",
+    authDomain: "reactfire-bd1e8.firebaseapp.com",
+    projectId: "reactfire-bd1e8",
+    storageBucket: "reactfire-bd1e8.appspot.com",
+    messagingSenderId: "741275514275",
+    appId: "1:741275514275:web:bcd112476ae1f91839d616",
+    measurementId: "G-97L48GKY1E"
   };
 
 const firebase = initializeApp(firebaseConfig);
@@ -40,6 +41,8 @@ const selectStyles = {
 
 
 export const SignUp = () => {
+
+    console.log("signUpPageRendered!!!")
 
     const [email, setEmail] = useState(null);
     const [password, setPassword] = useState(null);
@@ -86,11 +89,10 @@ export const SignUp = () => {
                 friends : {},
             });
 
-           //  const newRef = collection(usersDoc, "pendingFriendRequests")
-            // await addDoc(newRef, {})
-            //console.log('firebase signup executed');
+            
         } catch (err) {
             //console.error(err);
+            console.error("error: ", err)
              return <Navigate to="/signUp" />;
         }
     };

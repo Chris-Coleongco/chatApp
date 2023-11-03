@@ -49,6 +49,7 @@ export const Dashboard = () => {
                 <FriendsList userUID={userUID}/>
             
                 <Settings/>
+                
             </>
             
         

@@ -14,9 +14,9 @@ export const Settings = () => {
         // Sign-out successful.
         setRequestedSignOut(true)
         console.log('signed out user')
-        }).catch((error) => {
+        }).catch(() => {
         // An error happened.
-        console.log(error)
+        console.log("uh ohhh")
         });
     }
 
