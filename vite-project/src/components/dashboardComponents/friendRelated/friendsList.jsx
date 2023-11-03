@@ -137,7 +137,7 @@ export const FriendsList = ({userUID})  => {
         
     }
 
-
+//! saddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
     const acceptFriendRequest = async (evt) => {
         
 
@@ -157,7 +157,15 @@ export const FriendsList = ({userUID})  => {
         
 
         if (existingFriendCheckData === undefined) {
+/*
+            const privateChatDoc = await addDoc(collection(db, 'privateMessages' ) {
+                messages: {
+                    messagerUID : ,
+                    timeSent : ,
 
+                }
+            })
+*/
             console.log(buttonValue)
             
             const usersDocSnap = (await getDoc(usersDoc)).data();
@@ -167,10 +175,6 @@ export const FriendsList = ({userUID})  => {
             const personsDocSnap = (await getDoc(personsDoc)).data();
             const personsNewFriends = { ...personsDocSnap.friends }
             personsNewFriends[userUID] = userUID
-            
-            await updateDoc(usersDoc, {
-                ['incomingFriendRequests.' + buttonValue]: deleteField()
-            });
     
             await updateDoc(usersDoc, {
                 friends : usersNewFriends,
@@ -179,7 +183,12 @@ export const FriendsList = ({userUID})  => {
             await updateDoc(personsDoc, {
                 friends : personsNewFriends,
             },  { merge: true })
-            
+
+            await setDoc()
+
+            await updateDoc(usersDoc, {
+                ['incomingFriendRequests.' + buttonValue]: deleteField()
+            });
     
             await updateDoc(personsDoc, {
                 ['pendingFriendRequests.' + userUID]: deleteField()

@@ -47,6 +47,8 @@ export const Dashboard = () => {
         
             <>
                 <FriendsList userUID={userUID}/>
+
+                //! ADD COMPONENT FOR PRIVATE / SERVER CHATS THAT IS CONDITIONAL (IF USER CLICKS ON A CHAT / SERVER THEN RENDER THE COMPONENT. IF NOT THEN DONT RENDER)
             
                 <Settings/>
                 
