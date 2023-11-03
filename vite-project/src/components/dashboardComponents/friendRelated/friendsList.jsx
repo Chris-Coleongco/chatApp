@@ -103,9 +103,10 @@ export const FriendsList = ({userUID})  => {
             //doc(usersDoc, "friends",)
 
             try {
+                
                 await updateDoc(usersDoc, {
                     [`pendingFriendRequests.${friendRequestSearchBuffer}`]: friendRequestSearchBuffer
-                }, { merge: true })
+                }, { merge: true }) // NEED TO FIX SO DOESNT OVERWRITE PENDINGFRIENDREQUESTS
             } catch (error) {
                 await setDoc(usersDoc, {
                     pendingFriendRequests : {
@@ -117,7 +118,7 @@ export const FriendsList = ({userUID})  => {
             try {
                 await updateDoc(personsDoc, {
                     [`incomingFriendRequests.${userUID}`]: userUID
-                }, { merge: true })
+                }, { merge: true }) // NEED TO FIX SO DOESNT OVERWRITE PENDINGFRIENDREQUESTS
             } catch (error) {
                 await setDoc(personsDoc, {
                     incomingFriendRequests : {
@@ -138,41 +139,53 @@ export const FriendsList = ({userUID})  => {
 
 
     const acceptFriendRequest = async (evt) => {
+        
 
         console.log(userUID)
-
-        const usersDoc = doc(db, "users", userUID);
-
-         // GET THE UID OF THE REQUESTER FROM THE USER FIELD 
-        
-        
         const buttonValue = evt.target.value;
-
-        const personsDoc = doc(db, "users", buttonValue)
-
+        const usersDoc = doc(db, "users", userUID);
+        
         console.log(buttonValue)
 
-        await updateDoc(usersDoc, {
-            friends : {
-                [buttonValue]: buttonValue
-            },
-        },  { merge: true })
+        const personsDoc = doc(db, "users", buttonValue)
+        const existingFriendCheck = await getDoc(doc(usersDoc, "friends", buttonValue))
 
-        // !!!!!!!! FIX THE DELETION
-        const deeperUsersDoc = doc(usersDoc, 'incomingFriendRequests', buttonValue)
+        const existingFriendCheckData = existingFriendCheck.data()
 
-       deleteDoc(deeperUsersDoc)
-// !!!!!!!! THIS DOESNT WORK
-        await updateDoc(personsDoc, {
-            friends : {
-                [userUID]: userUID
-            },
-        },  { merge: true })
-// !!!!!!!! FIX THE DELETION
-        const deeperPersonsDoc = doc(personsDoc, 'pendingFriendRequests', userUID)
+        console.log(typeof existingFriendCheck.data())
 
-        deleteDoc(deeperPersonsDoc)
-// !!!!!!!! THIS DOESNT WORK
+        
+
+        if (existingFriendCheckData === undefined) {
+
+            console.log(buttonValue)
+            
+            const usersDocSnap = (await getDoc(usersDoc)).data();
+            const usersNewFriends = { ...usersDocSnap.friends }
+            usersNewFriends[buttonValue] = buttonValue
+
+            const personsDocSnap = (await getDoc(personsDoc)).data();
+            const personsNewFriends = { ...personsDocSnap.friends }
+            personsNewFriends[userUID] = userUID
+            
+            await updateDoc(usersDoc, {
+                ['incomingFriendRequests.' + buttonValue]: deleteField()
+            });
+    
+            await updateDoc(usersDoc, {
+                friends : usersNewFriends,
+            },  { merge: true })
+
+            await updateDoc(personsDoc, {
+                friends : personsNewFriends,
+            },  { merge: true })
+            
+    
+            await updateDoc(personsDoc, {
+                ['pendingFriendRequests.' + userUID]: deleteField()
+            });
+    
+        }
     }
     //console.log(friendsListReference)
 
