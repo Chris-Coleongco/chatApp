@@ -87,6 +87,7 @@ export const SignUp = () => {
                     state : selectedState,
                 },
                 friends : {},
+                chats : {}
             });
 
             

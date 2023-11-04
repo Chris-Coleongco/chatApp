@@ -157,34 +157,41 @@ export const FriendsList = ({userUID})  => {
         
 
         if (existingFriendCheckData === undefined) {
-/*
-            const privateChatDoc = await addDoc(collection(db, 'privateMessages' ) {
-                messages: {
-                    messagerUID : ,
-                    timeSent : ,
 
-                }
+            const privateChatDoc = await addDoc(collection(db, 'privateMessages' ), {
+                messages: {}
             })
-*/
+
+            const privateChatID = privateChatDoc.id
+
+            console.log("Document written with ID: ", privateChatDoc.id);
+
+
             console.log(buttonValue)
             
             const usersDocSnap = (await getDoc(usersDoc)).data();
             const usersNewFriends = { ...usersDocSnap.friends }
+            const usersNewChats = { ...usersDocSnap.chats }
+
+            usersNewChats[privateChatID] = privateChatID
             usersNewFriends[buttonValue] = buttonValue
 
             const personsDocSnap = (await getDoc(personsDoc)).data();
             const personsNewFriends = { ...personsDocSnap.friends }
+            const personsNewChats = { ...personsDocSnap.chats }
+
+            personsNewChats[privateChatID] = privateChatID
             personsNewFriends[userUID] = userUID
     
             await updateDoc(usersDoc, {
                 friends : usersNewFriends,
+                chats : usersNewChats,
             },  { merge: true })
 
             await updateDoc(personsDoc, {
                 friends : personsNewFriends,
+                chats : personsNewChats,
             },  { merge: true })
-
-            await setDoc()
 
             await updateDoc(usersDoc, {
                 ['incomingFriendRequests.' + buttonValue]: deleteField()
@@ -255,6 +262,8 @@ export const FriendsList = ({userUID})  => {
                         <h5>{firebaseRetrievedFriends[friend]}</h5>
                     </div>
                 ))}
+
+                {/*/ !{firebaseRetrievedChats && Object.keys BLAH BLAH LIKE ABOVE BUT USE FIREBASERETRIEVED CHATS THEN HREF href={'/friend/'+ chatID}}-->*/}
                 
 
             </div>

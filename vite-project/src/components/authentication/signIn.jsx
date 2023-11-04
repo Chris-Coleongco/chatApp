@@ -34,10 +34,10 @@ export const SignIn = () =>  {
         signInWithEmailAndPassword(auth, email, password).then((userCredential) => {
         // Signed in 
         setUserSignedIn(true);
-        const doc = doc(db, "users", userUID)
-        const usersFriends = doc.get('friends')
         console.log('sign in')
-        const user = userCredential.user;
+        const user = userCredential.user.uid;
+        //! set user status to online
+
         console.log(user)
       })
       .catch((error) => {
