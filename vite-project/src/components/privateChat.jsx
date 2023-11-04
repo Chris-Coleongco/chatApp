@@ -47,6 +47,7 @@ export const PrivateChat = () => {
     const { chatID } = useParams()
 
     // ! THIS IS WHERE YOU PUT THE PRIVATE CHAT RETRIEVAL CODE FROM FIREBASE TO PUT IN COMPONENT
+    //! TAKE THE USER UID THEN CD INTO chats IN THE USERSDOC THEN  USE URL PARAM {chatID} TO RETRIEVE DATA FROM FIREBASE
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
