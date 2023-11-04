@@ -159,6 +159,10 @@ export const FriendsList = ({userUID})  => {
         if (existingFriendCheckData === undefined) {
 
             const privateChatDoc = await addDoc(collection(db, 'privateMessages' ), {
+                users: {
+                    [userUID]: userUID,
+                    [buttonValue]: buttonValue
+                },
                 messages: {}
             })
 
