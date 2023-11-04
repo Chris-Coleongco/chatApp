@@ -45,19 +45,47 @@ export const PrivateChat = () => {
     const { chatID } = useParams()
     // ! WRAP THIS SO IT ACTIVATES ON CHANGE OF THE PRIVATE CHAT DATA
 
-    const messagesRef = collection(doc(db, 'privateMessages', chatID), 'messages')
+    const messagesDocRef = doc(db, 'privateMessages', chatID)
+
+    const messagesRef = collection(messagesDocRef, 'messages')
+
+
+
+    const fetchChatData = async () => {
+
+        const messagesDocUsers = (await getDoc(messagesDocRef)).data().users
+
+        if (userUID in messagesDocUsers) {
+            console.log('user should have access')
+            setUserHasChatAccess(true)
+            //! DO THIS SOON setUserChatData
+        }
+
+        console.log(messagesDocUsers)
+
+        const myQuery = query(messagesRef, orderBy('timestamp'), limit(PAGE_SIZE))
+
+        const unsubscribe = onSnapshot(myQuery, (snapshot) => {
+            
+            const lastVisible = snapshot.docs[snapshot.docs.length - 1]
+            console.log(lastVisible)
+
+            //! ONTO THIS BIT NOW 
+
+            /*const next = query(collection(db, "cities"),
+    orderBy("population"),
+    startAfter(lastVisible),
+    limit(25));*/
+            
+            //snapshot.forEach((doc) => {
+             //   console.log(doc.id, ' => ', doc.data());
+             // });
+        })
+
+        return unsubscribe;
+    }
 
     useEffect(() => {
-        const fetchChatData = async () => {
-    
-            const unsubscribe = onSnapshot(query(messagesRef, orderBy('timestamp')), (snapshot) => {
-                snapshot.forEach((doc) => {
-                    console.log(doc.id, ' => ', doc.data());
-                  });
-            })
-    
-            return unsubscribe;
-        }
         
         fetchChatData();
 
