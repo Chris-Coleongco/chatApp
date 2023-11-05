@@ -22,7 +22,7 @@ const firebaseConfig = {
 const firebase = initializeApp(firebaseConfig);
 const db = getFirestore(firebase);
 
-const PAGE_SIZE = 20
+const PAGE_SIZE = 1
 
 const userUID = { uid: null }
 
@@ -49,8 +49,9 @@ export const PrivateChat = () => {
 
     const messagesRef = collection(messagesDocRef, 'messages')
 
+    const [lastVisible, setLastVisible] = useState(null)
 
-
+    //////////////////////////////////////////////////
     const fetchChatData = async () => {
 
         const messagesDocUsers = (await getDoc(messagesDocRef)).data().users
@@ -58,16 +59,28 @@ export const PrivateChat = () => {
         if (userUID in messagesDocUsers) {
             console.log('user should have access')
             setUserHasChatAccess(true)
-            //! DO THIS SOON setUserChatData
+            
+        } else {
+            console.log('user unauthorized')
         }
 
         console.log(messagesDocUsers)
 
-        const myQuery = query(messagesRef, orderBy('timestamp'), limit(PAGE_SIZE))
+        let myQuery = query(messagesRef, orderBy('timestamp'), limit(PAGE_SIZE))
+
+        if (lastVisible) {
+            myQuery = query(messagesRef, orderBy('timestamp'), limit(PAGE_SIZE), startAfter(lastVisible))
+        }
 
         const unsubscribe = onSnapshot(myQuery, (snapshot) => {
-            
-            const lastVisible = snapshot.docs[snapshot.docs.length - 1]
+            const paginatedChats = snapshot.docs.map((doc) => doc.data())
+            if (paginatedChats.length >= PAGE_SIZE) {
+                setUserChatData((retrievedChats) => [...retrievedChats, ...paginatedChats])
+            } else {
+                console.log('no more data')
+            }
+
+            setLastVisible(snapshot.docs[snapshot.docs.length - 1])
             console.log(lastVisible)
 
             //! ONTO THIS BIT NOW 
@@ -85,11 +98,12 @@ export const PrivateChat = () => {
         return unsubscribe;
     }
 
-    useEffect(() => {
-        
-        fetchChatData();
 
-    }, [messagesRef])
+    const paginateMagic = () => {
+        
+        fetchChatData(lastVisible);
+
+    }
 /*const chatId = 'chat1';
 const messagesRef = collection(doc(db, 'privateMessages', chatId), 'messages');
 
@@ -146,6 +160,7 @@ const unsubscribe = onSnapshot(messagesRef, (snapshot) => {
                 <div className="chat">
                     <h2>{ chatID }</h2>
                     /*THIS ISNT WORKING CUZ THE DATA IS A TWO DICTIONARY DATATYPE. */
+                    <button onClick={paginateMagic}>click to see more msgs</button>
                 </div>
                 </>
                 /* {userChatData && 
