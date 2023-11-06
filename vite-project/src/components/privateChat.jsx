@@ -45,14 +45,16 @@ export const PrivateChat = () => {
     const { chatID } = useParams()
     // ! WRAP THIS SO IT ACTIVATES ON CHANGE OF THE PRIVATE CHAT DATA
 
-    const messagesDocRef = doc(db, 'privateMessages', chatID)
-
-    const messagesRef = collection(messagesDocRef, 'messages')
+    
 
     const [lastVisible, setLastVisible] = useState(null)
 
     //////////////////////////////////////////////////
     const fetchChatData = async () => {
+        
+        const messagesDocRef = doc(db, 'privateMessages', chatID)
+
+        const messagesRef = collection(messagesDocRef, 'messages')
 
         const messagesDocUsers = (await getDoc(messagesDocRef)).data().users
 
@@ -78,6 +80,7 @@ export const PrivateChat = () => {
                 setUserChatData((retrievedChats) => [...retrievedChats, ...paginatedChats])
             } else {
                 console.log('no more data')
+                return unsubscribe();
             }
 
             setLastVisible(snapshot.docs[snapshot.docs.length - 1])
@@ -94,8 +97,6 @@ export const PrivateChat = () => {
              //   console.log(doc.id, ' => ', doc.data());
              // });
         })
-
-        return unsubscribe;
     }
 
 
