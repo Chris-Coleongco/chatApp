@@ -35,6 +35,7 @@ export const PrivateChat = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     const [isLoading, setIsLoading] = useState(true);
+    const [isFetchingChatData, setIsFetchingChatData] = useState(false);
 
     const [userHasChatAccess, setUserHasChatAccess] = useState(false)
 
@@ -51,6 +52,8 @@ export const PrivateChat = () => {
 
     //////////////////////////////////////////////////
     const fetchChatData = async () => {
+
+        setIsFetchingChatData(true)
         
         const messagesDocRef = doc(db, 'privateMessages', chatID)
 
@@ -76,12 +79,13 @@ export const PrivateChat = () => {
 
         const unsubscribe = onSnapshot(myQuery, (snapshot) => {
             const paginatedChats = snapshot.docs.map((doc) => doc.data())
-            if (paginatedChats.length >= PAGE_SIZE) {
-                setUserChatData((retrievedChats) => [...retrievedChats, ...paginatedChats])
-            } else {
+            if ((paginatedChats.length >= PAGE_SIZE) == false) {
                 console.log('no more data')
-                return unsubscribe();
+                return unsubscribe;
+            } else {
+                setUserChatData((retrievedChats) => [...retrievedChats, ...paginatedChats])
             }
+            // needs to run 
 
             setLastVisible(snapshot.docs[snapshot.docs.length - 1])
             console.log(lastVisible)
@@ -96,13 +100,18 @@ export const PrivateChat = () => {
             //snapshot.forEach((doc) => {
              //   console.log(doc.id, ' => ', doc.data());
              // });
+
+             setIsFetchingChatData(false)
         })
+        return unsubscribe;
     }
 
 
     const paginateMagic = () => {
-        
-        fetchChatData(lastVisible);
+
+        if (isFetchingChatData == false) {
+            fetchChatData(lastVisible);
+        }
 
     }
 /*const chatId = 'chat1';
