@@ -22,7 +22,7 @@ const firebaseConfig = {
 const firebase = initializeApp(firebaseConfig);
 const db = getFirestore(firebase);
 
-const PAGE_SIZE = 1
+const PAGE_SIZE = 10
 
 const userUID = { uid: null }
 
@@ -71,15 +71,15 @@ export const PrivateChat = () => {
 
         console.log(messagesDocUsers)
 
-        let myQuery = query(messagesRef, orderBy('timestamp'), limit(PAGE_SIZE))
+        let myQuery = query(messagesRef, orderBy('timestamp', 'desc'), limit(PAGE_SIZE))
 
         if (lastVisible) {
-            myQuery = query(messagesRef, orderBy('timestamp'), limit(PAGE_SIZE), startAfter(lastVisible))
+            myQuery = query(messagesRef, orderBy('timestamp', 'desc'), limit(PAGE_SIZE), startAfter(lastVisible))
         }
 
         const unsubscribe = onSnapshot(myQuery, (snapshot) => {
             const paginatedChats = snapshot.docs.map((doc) => doc.data())
-            if ((paginatedChats.length >= PAGE_SIZE) == false) {
+            if ((paginatedChats.length >= 1) == false) {
                 console.log('no more data')
                 return unsubscribe;
             } else {
@@ -113,6 +113,10 @@ export const PrivateChat = () => {
             fetchChatData(lastVisible);
         }
 
+    }
+
+    if (userChatData.length == 0) {
+        paginateMagic()
     }
 /*const chatId = 'chat1';
 const messagesRef = collection(doc(db, 'privateMessages', chatId), 'messages');
