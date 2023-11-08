@@ -8,6 +8,8 @@ import { Dashboard } from "./dashboard";
 import { getDefaultLocale } from "react-datepicker";
 // ! import { getStorage, ref } from "firebase/storage";
 
+import { MessagingInterface } from "./privateChatComponents/privateChatMain";
+
 
 const firebaseConfig = {
     apiKey: "AIzaSyAjZvIcX0bRqNWEM-jwZtQ-EWFEX3HICe8",
@@ -171,11 +173,20 @@ const unsubscribe = onSnapshot(messagesRef, (snapshot) => {
         return (
     
                 <>
-                <div className="chat">
-                    <h2>{ chatID }</h2>
+                
+                <div className="chat privateChat">
+                    <nav className="utilVerticalBar text-green-500">
+                    </nav>
+                    <h2 className="text-green-500">{ chatID }</h2>
                     /*THIS ISNT WORKING CUZ THE DATA IS A TWO DICTIONARY DATATYPE. */
-                    <button onClick={paginateMagic}>click to see more msgs</button>
+                    this needs to be on scroll up in message box /*onClick={paginateMagic}*/
+                    // add code here to show the chat messages and message input 
+                    <MessagingInterface/>
+                    <div className="utilVerticalBar">
                 </div>
+                
+                </div>
+                
                 </>
                 /* {userChatData && 
                     Object.keys(userChatData).map((data, index) => (

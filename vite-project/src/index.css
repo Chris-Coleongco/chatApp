@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -5,7 +9,7 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  background-color: #ffffff;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -24,11 +28,15 @@ a:hover {
 }
 
 body {
+  background-color: black;
+  height: 100vh;
+  width: 100vw;
   margin: 0;
+  padding: 0;
+  position: absolute;
+  overflow: hidden;
   display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  flex-direction: column;
 }
 
 h1 {
@@ -93,3 +101,40 @@ button:focus-visible {
   font-family: Arial, sans-serif;
   /* Add other styling properties as needed */
 }
+
+.utilVerticalBar {
+  overflow: hidden;
+  display: flex;
+  width: 72px;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: absolute;
+  background-color: var(--background-tertiary);
+  background-color: #646cff;
+  height: 100vh;
+}
+
+.privateChat {
+  position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    overflow: hidden;
+    flex-direction: column;
+}
+
+.messagingInterfaceBox {
+  margin: 0 auto;
+  
+  background-color: #213547;
+}
+
+.messageText {
+  color: #646cff;
+  flex: 1;
+  margin-left: 200px; /* Adjust the margin to match the width of the navigation bar */
+  padding: 20px;
+}
+
