@@ -1,5 +1,5 @@
 import { Navigate, useLoaderData, useParams } from "react-router-dom";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getFirestore, collection, onSnapshot, doc, getDoc, getDocs, query, orderBy, limit, startAfter, where, updateDoc, addDoc, QuerySnapshot, setDoc, deleteField, deleteDoc, DocumentSnapshot } from "firebase/firestore";
 import { initializeApp } from "firebase/app";
 import { setDefaultEventParameters } from 'firebase/analytics';
@@ -9,7 +9,7 @@ import { getDefaultLocale } from "react-datepicker";
 // ! import { getStorage, ref } from "firebase/storage";
 
 import { MessagingInterface } from "./privateChatComponents/privateChatMain";
-
+import { useIntersection } from '@mantine/hooks'
 
 const firebaseConfig = {
     apiKey: "AIzaSyAjZvIcX0bRqNWEM-jwZtQ-EWFEX3HICe8",
@@ -43,7 +43,7 @@ export const PrivateChat = () => {
 
     const [userChatData, setUserChatData] = useState([])
 
-    console.log(userUID)
+   // console.log(userUID)
 
     const { chatID } = useParams()
     // ! WRAP THIS SO IT ACTIVATES ON CHANGE OF THE PRIVATE CHAT DATA
@@ -64,14 +64,14 @@ export const PrivateChat = () => {
         const messagesDocUsers = (await getDoc(messagesDocRef)).data().users
 
         if (userUID in messagesDocUsers) {
-            console.log('user should have access')
+            //console.log('user should have access')
             setUserHasChatAccess(true)
             
         } else {
-            console.log('user unauthorized')
+           // console.log('user unauthorized')
         }
 
-        console.log(messagesDocUsers)
+        //console.log(messagesDocUsers)
 
         let myQuery = query(messagesRef, orderBy('timestamp', 'desc'), limit(PAGE_SIZE))
 
@@ -82,15 +82,15 @@ export const PrivateChat = () => {
         const unsubscribe = onSnapshot(myQuery, (snapshot) => {
             const paginatedChats = snapshot.docs.map((doc) => doc.data())
             if ((paginatedChats.length >= 1) == false) {
-                console.log('no more data')
+                //console.log('no more data')
                 return unsubscribe;
             } else {
-                setUserChatData((retrievedChats) => [...retrievedChats, ...paginatedChats])
+                setUserChatData((retrievedChats) => [...paginatedChats])
             }
             // needs to run 
 
             setLastVisible(snapshot.docs[snapshot.docs.length - 1])
-            console.log(lastVisible)
+            //console.log(lastVisible)
 
             //! ONTO THIS BIT NOW 
 
@@ -117,6 +117,18 @@ export const PrivateChat = () => {
 
     }
 
+    const lastPostRef = useRef(null)
+
+    const {ref, entry} = useIntersection({
+        root: lastPostRef.current,
+        threshold: 1
+    })
+
+    useEffect(() => {
+        if (entry?.isIntersecting) paginateMagic()
+    }, [entry])
+
+
     if (userChatData.length == 0) {
         paginateMagic()
     }
@@ -136,12 +148,12 @@ const unsubscribe = onSnapshot(messagesRef, (snapshot) => {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
-                console.log('user is currently logged in');
-                console.log(user)
+                //console.log('user is currently logged in');
+               // console.log(user)
                 userUID.uid = user.uid
                 setIsAuthenticated(true);
             } else {
-                console.log('no user');
+                //console.log('no user');
             }
             setIsLoading(false);
         });
@@ -150,11 +162,11 @@ const unsubscribe = onSnapshot(messagesRef, (snapshot) => {
     
 
 
-    useEffect(() => {
-        console.log(userChatData);
+    //useEffect(() => {
+        //console.log(userChatData);
         
-        console.log(userHasChatAccess);
-    }, [userChatData, userHasChatAccess]);
+       // console.log(userHasChatAccess);
+    //}, [userChatData, userHasChatAccess]);
 
     if (isLoading) {
         return <p>Loading...</p>; // Display a loading indicator while checking the authentication state
@@ -174,14 +186,29 @@ const unsubscribe = onSnapshot(messagesRef, (snapshot) => {
     
                 <>
                 
-                <div className="chat privateChat">
-                    <nav className="utilVerticalBar text-green-500">
-                    </nav>
-                    <h2 className="text-green-500">{ chatID }</h2>
-                    /*THIS ISNT WORKING CUZ THE DATA IS A TWO DICTIONARY DATATYPE. */
-                    this needs to be on scroll up in message box /*onClick={paginateMagic}*/
-                    // add code here to show the chat messages and message input 
-                    <MessagingInterface/>
+                <div>
+                    <SideBar/>
+                    <h2 className="text-white">chat id: </h2>
+                    <h2 className="text-green-500">{ chatID }</h2>/* must run on scrollonClick={}*/
+                    <div className="overflow-scroll">
+                        {
+                            userChatData.reverse()?.map((msg, index) => {
+                                if (index === userChatData.length-1) {
+                                    return <div key={msg.id} ref={ref} className="h-20 bg-violet-500 text-black">
+                                    <p>Index: {index}</p>
+                                    <p>Message: {msg.message}</p>
+                                    <p>Sender: {msg.sender}</p>
+                                  </div>
+                                }
+                                return <div key={msg.id} className="h-20 bg-violet-500 text-black">
+                                    <p>Index: {index}</p>
+                                    <p>Message: {msg.message}</p>
+                                    <p>Sender: {msg.sender}</p>
+                                    </div>
+                                
+                            })
+                        }
+                    </div>
                     <div className="utilVerticalBar">
                 </div>
                 
@@ -201,3 +228,10 @@ const unsubscribe = onSnapshot(messagesRef, (snapshot) => {
 
     
 }
+
+export const SideBar = () => (
+    <div className="fixed top-0 left-0 h-screen w-16 m-0 flex flex-col bg-violet-950 text-white shadow-lg">
+        <button className="text-black text-xs text-center">dashboard</button>
+    </div>
+
+);
