@@ -22,7 +22,7 @@ const firebaseConfig = {
 const firebase = initializeApp(firebaseConfig);
 const db = getFirestore(firebase);
 
-const PAGE_SIZE = 10
+const PAGE_SIZE = 1
 
 const userUID = { uid: null }
 //!
@@ -107,8 +107,9 @@ export const PrivateChat = () => {
             if ((paginatedChats.length >= 1) == false) {
                 //console.log('no more data')
                 return unsubscribe;
-            } else {
-                setUserChatData(() => [...paginatedChats])
+            }
+            else {
+                setUserChatData([...paginatedChats, ...userChatData])
             }
             // needs to run 
 
@@ -170,7 +171,7 @@ const unsubscribe = onSnapshot(messagesRef, (snapshot) => {
        // console.log(userHasChatAccess);
     //}, [userChatData, userHasChatAccess]);
     const paginateMagic = () => {
-
+        //console.log('paginate')
         if (isFetchingChatData == false) {
             fetchChatData(lastVisible);
         }
