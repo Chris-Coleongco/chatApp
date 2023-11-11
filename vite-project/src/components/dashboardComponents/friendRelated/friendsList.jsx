@@ -162,8 +162,8 @@ export const FriendsList = ({userUID})  => {
                 users: {
                     [userUID]: userUID,
                     [buttonValue]: buttonValue
-                },
-                messages: {}
+                }
+                
             })
 
             const privateChatID = privateChatDoc.id

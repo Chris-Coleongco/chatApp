@@ -1,15 +1,13 @@
-import { Navigate, useLoaderData, useParams } from "react-router-dom";
+import { Link, Navigate, redirect, useParams } from "react-router-dom";
 import { useState, useEffect, useRef } from 'react';
-import { getFirestore, collection, onSnapshot, doc, getDoc, getDocs, query, orderBy, limit, startAfter, where, updateDoc, addDoc, QuerySnapshot, setDoc, deleteField, deleteDoc, DocumentSnapshot } from "firebase/firestore";
+import { getFirestore, collection, onSnapshot, doc, getDoc, query, orderBy, limit, startAfter } from "firebase/firestore";
 import { initializeApp } from "firebase/app";
 import { setDefaultEventParameters } from 'firebase/analytics';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
-import { Dashboard } from "./dashboard";
-import { getDefaultLocale } from "react-datepicker";
 // ! import { getStorage, ref } from "firebase/storage";
 
-import { MessagingInterface } from "./privateChatComponents/privateChatMain";
 import { useIntersection } from '@mantine/hooks'
+import { FaBuffer, FaHome, FaPhone, FaUserFriends } from 'react-icons/fa'
 
 const firebaseConfig = {
     apiKey: "AIzaSyAjZvIcX0bRqNWEM-jwZtQ-EWFEX3HICe8",
@@ -27,6 +25,19 @@ const db = getFirestore(firebase);
 const PAGE_SIZE = 10
 
 const userUID = { uid: null }
+//!
+//!
+//!
+//!
+//!
+//!                  ON MESSAGE SEND ADD TOMESSAGES COLLECITON (it will implicitly create on if it does not exist so no need to worry)
+
+//!
+
+//!
+//!
+//!
+
 
 export const PrivateChat = () => {
 
@@ -40,6 +51,8 @@ export const PrivateChat = () => {
     const [isFetchingChatData, setIsFetchingChatData] = useState(false);
 
     const [userHasChatAccess, setUserHasChatAccess] = useState(false)
+    
+    const [chatAccessLoading, setChatAccessLoading] = useState(true)
 
     const [userChatData, setUserChatData] = useState([])
 
@@ -56,19 +69,28 @@ export const PrivateChat = () => {
     const fetchChatData = async () => {
 
         setIsFetchingChatData(true)
+
+        console.log(chatID)
         
         const messagesDocRef = doc(db, 'privateMessages', chatID)
+
+        console.log(messagesDocRef)
 
         const messagesRef = collection(messagesDocRef, 'messages')
 
         const messagesDocUsers = (await getDoc(messagesDocRef)).data().users
 
-        if (userUID in messagesDocUsers) {
+        console.log(messagesDocUsers)
+
+        //console.log(userUID.uid)
+        //console.log(messagesDocUsers)
+
+        if (messagesDocUsers[userUID.uid]) {
             //console.log('user should have access')
             setUserHasChatAccess(true)
-            
+            setChatAccessLoading(false)
         } else {
-           // console.log('user unauthorized')
+           //console.log('user unauthorized')
         }
 
         //console.log(messagesDocUsers)
@@ -81,11 +103,12 @@ export const PrivateChat = () => {
 
         const unsubscribe = onSnapshot(myQuery, (snapshot) => {
             const paginatedChats = snapshot.docs.map((doc) => doc.data())
+            console.log(paginatedChats)
             if ((paginatedChats.length >= 1) == false) {
                 //console.log('no more data')
                 return unsubscribe;
             } else {
-                setUserChatData((retrievedChats) => [...paginatedChats])
+                setUserChatData(() => [...paginatedChats])
             }
             // needs to run 
 
@@ -109,29 +132,10 @@ export const PrivateChat = () => {
     }
 
 
-    const paginateMagic = () => {
-
-        if (isFetchingChatData == false) {
-            fetchChatData(lastVisible);
-        }
-
-    }
-
-    const lastPostRef = useRef(null)
-
-    const {ref, entry} = useIntersection({
-        root: lastPostRef.current,
-        threshold: 1
-    })
-
-    useEffect(() => {
-        if (entry?.isIntersecting) paginateMagic()
-    }, [entry])
 
 
-    if (userChatData.length == 0) {
-        paginateMagic()
-    }
+
+
 /*const chatId = 'chat1';
 const messagesRef = collection(doc(db, 'privateMessages', chatId), 'messages');
 
@@ -159,25 +163,58 @@ const unsubscribe = onSnapshot(messagesRef, (snapshot) => {
         });
         return unsubscribe;
     }, [auth]);
-    
-
 
     //useEffect(() => {
         //console.log(userChatData);
         
        // console.log(userHasChatAccess);
     //}, [userChatData, userHasChatAccess]);
+    const paginateMagic = () => {
 
-    if (isLoading) {
-        return <p>Loading...</p>; // Display a loading indicator while checking the authentication state
+        if (isFetchingChatData == false) {
+            fetchChatData(lastVisible);
+        }
+
     }
 
+    if (userChatData.length == 0) {
+        paginateMagic()
+    }
+
+    const firstPostRef = useRef(null)
+
+    const {ref, entry} = useIntersection({
+        root: firstPostRef.current,
+        threshold: 1
+    })
+
+    useEffect(() => {
+        if (entry?.isIntersecting) paginateMagic()
+    }, [entry])
+
+    if (isLoading) {
+        return <FaBuffer/>
+    }
+
+    if (chatAccessLoading) {
+        return<FaBuffer/>
+    }
+
+    //console.log(isAuthenticated)
+    //console.log(userHasChatAccess)
     
 
-    if (!isAuthenticated) {
+    if (isAuthenticated == false) {
         
         return (
-            <Navigate to={'/'} />
+            <Navigate to={'/signIn'} />
+        );
+    }
+    
+    if (userHasChatAccess == false) {
+        
+        return (
+            <Navigate to={'/dashboard'} />
         );
 
     } else {
@@ -190,20 +227,28 @@ const unsubscribe = onSnapshot(messagesRef, (snapshot) => {
                     <SideBar/>
                     <h2 className="text-white">chat id: </h2>
                     <h2 className="text-green-500">{ chatID }</h2>/* must run on scrollonClick={}*/
+
+                    
                     <div className="overflow-scroll">
                         {
                             userChatData.reverse()?.map((msg, index) => {
                                 if (index === userChatData.length-1) {
-                                    return <div key={msg.id} ref={ref} className="h-20 bg-violet-500 text-black">
+                                    
+                                    console.log(userChatData)
+                                    console.log('executed here')
+                                    return <div key={msg.id} ref={index === 0 ? ref : null} className="bg-violet-500 text-black p-">
                                     <p>Index: {index}</p>
                                     <p>Message: {msg.message}</p>
                                     <p>Sender: {msg.sender}</p>
+                                    <p>time: {(msg.timestamp).toString()}</p>
                                   </div>
                                 }
-                                return <div key={msg.id} className="h-20 bg-violet-500 text-black">
+                                console.log('executed there')
+                                return <div key={msg.id} className="bg-violet-500 text-black pt-1 pb-2 m-4">
                                     <p>Index: {index}</p>
                                     <p>Message: {msg.message}</p>
                                     <p>Sender: {msg.sender}</p>
+                                    <p>time: {(msg.timestamp).toString()}</p>
                                     </div>
                                 
                             })
@@ -231,7 +276,8 @@ const unsubscribe = onSnapshot(messagesRef, (snapshot) => {
 
 export const SideBar = () => (
     <div className="fixed top-0 left-0 h-screen w-16 m-0 flex flex-col bg-violet-950 text-white shadow-lg">
-        <button className="text-black text-xs text-center">dashboard</button>
+        <Link className="text-black text-xs text-center p-6 rounded-full mt-3 mb-3" to={'/dashboard'}><FaHome/></Link>
+        <Link className="text-black text-xs text-center p-6 rounded-full mb-3"><FaUserFriends/></Link>
     </div>
 
 );
