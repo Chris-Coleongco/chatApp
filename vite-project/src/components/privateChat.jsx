@@ -1,6 +1,6 @@
 import { Link, Navigate, redirect, useParams } from "react-router-dom";
 import { useState, useEffect, useRef } from 'react';
-import { getFirestore, collection, onSnapshot, doc, getDoc, query, orderBy, limit, startAfter } from "firebase/firestore";
+import { getFirestore, collection, onSnapshot, doc, getDoc, query, orderBy, limit, startAfter, Timestamp, serverTimestamp, addDoc } from "firebase/firestore";
 import { initializeApp } from "firebase/app";
 import { setDefaultEventParameters } from 'firebase/analytics';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
@@ -8,6 +8,9 @@ import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 
 import { useIntersection } from '@mantine/hooks'
 import { FaBuffer, FaHome, FaPhone, FaUserFriends } from 'react-icons/fa'
+
+import { SideBar } from "./privateChatComponents/sidebar";
+
 
 const firebaseConfig = {
     apiKey: "AIzaSyAjZvIcX0bRqNWEM-jwZtQ-EWFEX3HICe8",
@@ -57,17 +60,17 @@ export const PrivateChat = () => {
 
         setIsFetchingChatData(true)
 
-        console.log(chatID)
+       // console.log(chatID)
         
         const messagesDocRef = doc(db, 'privateMessages', chatID)
 
-        console.log(messagesDocRef)
+       // console.log(messagesDocRef)
 
         const messagesRef = collection(messagesDocRef, 'messages')
 
         const messagesDocUsers = (await getDoc(messagesDocRef)).data().users
 
-        console.log(messagesDocUsers)
+        //console.log(messagesDocUsers)
 
         //console.log(userUID.uid)
         //console.log(messagesDocUsers)
@@ -91,7 +94,7 @@ export const PrivateChat = () => {
 
         const unsubscribe = onSnapshot(myQuery, (snapshot) => {
             const paginatedChats = snapshot.docs.map((doc) => doc.data())
-            console.log(paginatedChats)
+         //   console.log(paginatedChats)
             if ((paginatedChats.length >= 1) == false) {
                 //console.log('no more data')
                 return unsubscribe;
@@ -123,11 +126,36 @@ export const PrivateChat = () => {
 
     const sendMessage = () => {
         console.log(msgToSend)
+
+        console.log(Date())
+
+        //! put the date AS A TIMESTAMP and msg to send along with sender (userUID) and then send it to firebase
+
+
+        const currentTime = Timestamp.fromDate(new Date())
+
+        
+        const privateChatDoc = doc(db, 'privateMessages', chatID)
+
+        const messagesCollection = collection(privateChatDoc, 'messages')
+
+        addDoc(messagesCollection, {
+            message : msgToSend,
+            sender : userUID.uid,
+            timestamp : currentTime,
+        })
+
+
     }
 
+    useEffect(() => {
+        console.log(msgToSend)
+        console.log(Date())
+    }, [msgToSend])
 
 
-/*const chatId = 'chat1';
+
+/* const chatId = 'chat1';
 const messagesRef = collection(doc(db, 'privateMessages', chatId), 'messages');
 
 const unsubscribe = onSnapshot(messagesRef, (snapshot) => {
@@ -153,15 +181,14 @@ const unsubscribe = onSnapshot(messagesRef, (snapshot) => {
             }
         });
         setLoadingAuthStatus(false)
-        console.log('authstatusset')
+     //   console.log('authstatusset')
         return unsubscribe;
     }, [auth]);
 
-    //useEffect(() => {
-        //console.log(userChatData);
-        
+    useEffect(() => {
+        console.log(userChatData);
        // console.log(userHasChatAccess);
-    //}, [userChatData, userHasChatAccess]);
+    }, [userChatData]);
     const paginateMagic = () => {
         //console.log('paginate')
         if (isFetchingChatData == false) {
@@ -188,14 +215,14 @@ const unsubscribe = onSnapshot(messagesRef, (snapshot) => {
     //console.log(isAuthenticated)
     //console.log(userHasChatAccess)
     
-    console.log(loadingAuthStatus)
-    console.log(loadingChatAccessStatus)
+ //   console.log(loadingAuthStatus)
+//    console.log(loadingChatAccessStatus)
 
     if (loadingAuthStatus == false && loadingChatAccessStatus == false) {
         console.log('loaidng complete')
 
-        console.log(isAuthenticated)
-        console.log(userHasChatAccess)
+       // console.log(isAuthenticated)
+       // console.log(userHasChatAccess)
 
         if (isAuthenticated == false) {
             return <Navigate to={'/signIn'}/>
@@ -217,14 +244,10 @@ const unsubscribe = onSnapshot(messagesRef, (snapshot) => {
                     <h2 className="text-green-500">{ chatID }</h2>/* must run on scrollonClick={}*/
 
                     
-                    <div className="overflow-scroll">
+                    <div className="">
                         {
-                            userChatData.reverse()?.map((msg, index) => {
-                                if (index === userChatData.length-1) {
-                                    
-                                    console.log(userChatData)
-                                    console.log('executed here')
-                                    return <div key={msg.id} ref={index === 0 ? ref : null} className="bg-violet-900 text-black pt-1 pb-2 m-4 rounded-md">
+                            userChatData.slice().reverse()?.map((msg, index) => {
+                                    return <div key={msg.id} className="bg-violet-900 text-black pt-1 pb-2 m-4 rounded-md">
                                     <p>Index: {index}</p>
                                     <p>Message: {msg.message}</p>
                                     <p>Sender: {msg.sender}</p>
@@ -232,21 +255,12 @@ const unsubscribe = onSnapshot(messagesRef, (snapshot) => {
                                     </p>
                                   </div>
                                 }
-                                console.log('executed there')
-                                return <div key={msg.id} className="bg-violet-900 text-black pt-1 pb-2 m-4 rounded-md">
-                                    <p>Index: {index}</p>
-                                    <p>Message: {msg.message}</p>
-                                    <p>Sender: {msg.sender}</p>
-                                    <p>time: {(msg.timestamp).toDate().toString()}</p>
-                                    </div>
-                                
-                            })
-                        }
+                            )}
                     </div>
-                    <form onSubmit={sendMessage}>
-                    <input placeholder="type here" onChange={(e) => setMsgToSend(e.target.value)}/>
-                    <button type="submit">send</button>
-                    </form>
+                    <div className="absolute inset-x-0 bottom-0 h-16 bg-purple-950">
+                    <input placeholder="type here" onChange={(e) => setMsgToSend(e.target.value)} className="rounded-md"/>
+                    <button onClick={sendMessage}  className="rounded-md bg-indigo-800 hover:bg-indigo-600">send</button>
+                    </div>
                 
                 </div>
                 
@@ -261,14 +275,3 @@ const unsubscribe = onSnapshot(messagesRef, (snapshot) => {
                 } */ 
             );
     }
-
-    
-
-
-export const SideBar = () => (
-    <div className="fixed top-0 left-0 h-screen w-16 m-0 flex flex-col bg-violet-950 text-white shadow-lg">
-        <Link className="text-black text-xs text-center p-6 rounded-full mt-3 mb-3" to={'/dashboard'}><FaHome/></Link>
-        <Link className="text-black text-xs text-center p-6 rounded-full mb-3"><FaUserFriends/></Link>
-    </div>
-
-);
