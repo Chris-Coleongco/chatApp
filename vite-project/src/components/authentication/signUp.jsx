@@ -4,7 +4,7 @@ import { auth } from '../../config/firebase';
 import { Navigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, setDoc, addDoc,  collection} from "firebase/firestore";
+import { getFirestore, doc, setDoc, addDoc, collection, Timestamp } from "firebase/firestore";
 
 // ! import { getStorage, ref } from "firebase/storage";
 
@@ -22,44 +22,109 @@ const firebaseConfig = {
     messagingSenderId: "741275514275",
     appId: "1:741275514275:web:bcd112476ae1f91839d616",
     measurementId: "G-97L48GKY1E"
-  };
+};
 
 const firebase = initializeApp(firebaseConfig);
 const db = getFirestore(firebase);
 // ! const storage = getStorage(firebase)
 // ! const storageRef = ref(storage, 'profilePictures');
-const genderChoices = ['male', 'female', 'other']
 
+const currentDate = new Date();
+const currentYear = currentDate.getFullYear();
+const currentMonth = currentDate.getMonth() + 1;
 
-const selectStyles = {
-    option: (provided, state) => ({
-      ...provided,
-      color: state.isSelected ? 'white' : 'black',
-    }),
-  }
+const years = Array.from({ length: currentYear - 1899 }, (_, index) => currentYear - index);
 
+// Generate an array of months up to the current month
+const monthNames = [
+    'January', 'February', 'March', 'April',
+    'May', 'June', 'July', 'August',
+    'September', 'October', 'November', 'December'
+];
+
+const months = Array.from({ length: currentMonth }, (_, index) => monthNames[index]);
+
+console.log(months)
+
+const days31 = Array.from({ length: 31 }, (_, index) => index + 1);
+const daysFeb = Array.from({ length: 29 }, (_, index) => index + 1);
+const days30 = Array.from({ length: 30 }, (_, index) => index + 1);
+
+let shownDays = days31;
 
 
 export const SignUp = () => {
 
-    console.log("signUpPageRendered!!!")
+    //console.log("signUpPageRendered!!!")
 
     const [email, setEmail] = useState(null);
     const [password, setPassword] = useState(null);
     const [fullName, setFullName] = useState(null);
     const [selectedGender, setSelectedGender] = useState(null);
-    const [bday, setBday] = useState(null);
 
-    console.log(bday)
-    
+    const [selectedYear, setSelectedYear] = useState(null);
+    const [selectedMonth, setSelectedMonth] = useState(null);
+    const [selectedDay, setSelectedDay] = useState(null);
+
     const countryData = Country.getAllCountries();
-    //console.log(countryData)
 
     const [stateData, setStateData] = useState([]);
 
     const [selectedCountry, setSelectedCountry] = useState(null);
 
     const [selectedState, setSelectedState] = useState(null);
+
+    const [userCreatedBool, setUserCreatedBool] = useState(false);
+
+
+    const handleGender = (evt) => {
+
+        const gender = evt.target.value;
+
+        setSelectedGender(gender)
+
+        //console.log(gender)
+
+    }
+
+    const handleBday = () => {
+
+        const formattedBirthday = selectedYear.value + "-" + selectedMonth.value + "-" + selectedDay.value;
+
+        const timestampBday = new Date(formattedBirthday)
+
+        return timestampBday
+
+    }
+
+    useEffect(() => {
+
+        console.log(selectedMonth)
+        console.log(selectedDay)
+        console.log(selectedYear)
+
+        if (selectedMonth?.value == 2) {
+
+            shownDays = daysFeb
+
+            console.log(shownDays)
+
+        }
+
+        else if (selectedMonth?.value % 2 != 0) {
+            //console.log('this has 31 days')
+
+            shownDays = days31
+
+        }
+
+        else {
+            shownDays = days30
+            console.log(shownDays)
+        }
+
+    }, [selectedMonth])
+
 
     useEffect(() => {
         //console.log(selectedCountry?.value)
@@ -68,7 +133,7 @@ export const SignUp = () => {
         //console.log(states)
     }, [selectedCountry]);
 
-    const [userCreatedBool, setUserCreatedBool] = useState(false);
+
 
     const firebaseSignUp = async (e) => {
         e.preventDefault();
@@ -79,24 +144,29 @@ export const SignUp = () => {
             const uid = user.uid;
             const usersDoc = doc(db, "users", uid);
             await setDoc(usersDoc, {
-                fullName : fullName,
-                gender : selectedGender,
-                bday: bday,
-                location : {
-                    country : selectedCountry,
-                    state : selectedState,
+                fullName: fullName,
+                gender: selectedGender,
+                bday: timestampBday,
+                location: {
+                    country: selectedCountry,
+                    state: selectedState,
                 },
-                friends : {},
-                chats : {}
+                friends: {},
+                chats: {}
             });
 
-            
+
         } catch (err) {
             //console.error(err);
-            console.error("error: ", err)
-             return <Navigate to="/signUp" />;
+            //console.error("error: ", err)
+            return <Navigate to="/signUp" />;
         }
     };
+
+
+
+
+
 
     if (userCreatedBool) {
         return <Navigate to="/signIn" />;
@@ -106,34 +176,76 @@ export const SignUp = () => {
         <div>
             <form onSubmit={firebaseSignUp}>
                 <h1>Sign Up</h1>
+                <br />
                 <input placeholder="Email" required onChange={(e) => setEmail(e.target.value)} />
-                <br/>
+                <br />
+                <br />
                 <input placeholder="Password" type="password" required onChange={(e) => setPassword(e.target.value)} />
-                <br/>
+                <br />
+                <br />
                 <input placeholder="Full Name" required onChange={(e) => setFullName(e.target.value)} />
-                <br/>
+                <br />
+                <br />
+                <br />
+
+                <div className="flex justify-center space-x-4">
+                    <label className="inline-flex items-center">
+                        <input type="radio" name="group" value="Male" onChange={handleGender} />
+                        <span className="ml-2">Male</span>
+                    </label>
+
+                    <label className="inline-flex items-center">
+                        <input type="radio" name="group" value="Female" onChange={handleGender} />
+                        <span className="ml-2">Female</span>
+                    </label>
+                </div>
+                <br />
+
+                <h4>birthday</h4>
+
                 <Select
-                required
-                value={selectedGender}
-                options={genderChoices.map(gender => ({value: gender}))}
-                onChange={(selectedGender) => setSelectedGender(selectedGender)}
-                styles={selectStyles}
+                    required
+                    value={selectedYear}
+                    options={years.map(year => ({ value: year, label: year }))}
+                    onChange={(selectedYear) => setSelectedYear(selectedYear)}
+                //styles={selectStyles}
                 />
-                <br/>
-                <DatePicker className='custom-calendar' selected={bday} onChange={(bday) => setBday(bday)} dateFormat="MMMM d, yyyy" />
+
                 <Select
-                required
-                value={selectedCountry}
-                options={countryData.map(country => ({ value: country.isoCode, label: country.name }))}
-                onChange={(selectedCountry) => setSelectedCountry(selectedCountry)}
-                styles={selectStyles}
+                    required
+                    value={selectedMonth}
+                    options={months.map(month => ({ value: months.indexOf(month) + 1, label: month }))}
+                    onChange={(selectedMonth) => setSelectedMonth(selectedMonth)}
+                //styles={selectStyles}
+                />
+
+                <Select
+                    required
+                    value={selectedDay}
+                    options={shownDays.map(day => ({ value: day, label: day }))}
+                    onChange={(selectedDay) => setSelectedDay(selectedDay)}
+                //styles={selectStyles}
+                />
+
+                <br />
+
+                <h4>location</h4>
+
+                <Select
+                    required
+                    value={selectedCountry}
+                    options={countryData.map(country => ({ value: country.isoCode, label: country.name }))}
+                    onChange={(selectedCountry) => setSelectedCountry(selectedCountry)}
+                //styles={selectStyles}
                 />
                 <Select
-                value={selectedState}
-                options={stateData.map(state => ({ value: state.isoCode, label: state.name }))}
-                onChange={(selectedState) => setSelectedState(selectedState)} 
-                styles={selectStyles}
+                    value={selectedState}
+                    options={stateData.map(state => ({ value: state.isoCode, label: state.name }))}
+                    onChange={(selectedState) => setSelectedState(selectedState)}
+                //styles={selectStyles}
                 />
+
+                <button type='button' onClick={handleBday}>handleBday</button>
 
                 <button type='submit'>Submit</button>
             </form>
