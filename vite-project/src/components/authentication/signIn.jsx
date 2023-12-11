@@ -41,10 +41,7 @@ export const SignIn = () =>  {
         console.log(user)
       })
       .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.log(errorCode)
-        console.log(errorMessage)
+        console.log('uh oh')
       });
     }
     

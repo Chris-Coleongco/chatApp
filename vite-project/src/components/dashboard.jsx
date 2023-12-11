@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { FriendsList } from './dashboardComponents/friendRelated/friendsList';
-import { Settings } from './dashboardComponents/settings';
 import { Link, Navigate, redirect, useParams } from "react-router-dom";
 import { FaBuffer, FaHome, FaPhone, FaUserFriends } from 'react-icons/fa'
 import { SideBar } from "./privateChatComponents/sidebar";
@@ -50,11 +49,6 @@ export const Dashboard = () => {
             <>
                 <SideBar/>
                 <FriendsList userUID={userUID}/>
-
-                //! ADD COMPONENT FOR PRIVATE / SERVER CHATS THAT IS CONDITIONAL (IF USER CLICKS ON A CHAT / SERVER THEN RENDER THE COMPONENT. IF NOT THEN DONT RENDER)
-            
-                <Settings/>
-                
             </>
             
         

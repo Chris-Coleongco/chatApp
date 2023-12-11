@@ -140,13 +140,14 @@ export const SignUp = () => {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             setUserCreatedBool(true);
+            console.log('created user auth')
             const user = userCredential.user;
             const uid = user.uid;
             const usersDoc = doc(db, "users", uid);
             await setDoc(usersDoc, {
                 fullName: fullName,
                 gender: selectedGender,
-                bday: timestampBday,
+                bday: handleBday(),
                 location: {
                     country: selectedCountry,
                     state: selectedState,
@@ -154,6 +155,8 @@ export const SignUp = () => {
                 friends: {},
                 chats: {}
             });
+
+            console.log('created documents')
 
 
         } catch (err) {

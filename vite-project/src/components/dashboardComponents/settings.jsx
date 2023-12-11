@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { getAuth, signOut } from "firebase/auth";
+import { FaDoorOpen } from 'react-icons/fa'
 
 const auth = getAuth();
 
@@ -14,7 +15,7 @@ export const Settings = () => {
         // Sign-out successful.
         setRequestedSignOut(true)
         console.log('signed out user')
-        }).catch(() => {
+        }).catch((error) => {
         // An error happened.
         console.log("uh ohhh")
         });
@@ -30,7 +31,7 @@ export const Settings = () => {
 
     return (
 
-        <button onClick={customSignOutFunc}>log out</button>
+        <button onClick={customSignOutFunc}><FaDoorOpen/></button>
 
     );
 

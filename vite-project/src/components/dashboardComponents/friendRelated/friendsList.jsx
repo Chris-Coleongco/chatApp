@@ -37,6 +37,8 @@ export const FriendsList = ({userUID})  => {
     const [firebaseRetrievedFriends , setFirebaseRetrievedFriends] = useState({})
 
     const [firebaseRetrievedFriendRequests , setFirebaseRetrievedFriendRequests] = useState([])
+    
+    const [firebaseRetrievedChats, setFirebaseRetrievedChats] = useState([])
 
 
     useEffect(() => {
@@ -48,6 +50,7 @@ export const FriendsList = ({userUID})  => {
             const usersDoc = onSnapshot(doc(db, "users", userUID), (doc) => {
 
                 const usersFriends = doc.get('friends')
+                const usersChats = doc.get('chats')
                 // ! YOU CAN USE THIS FUNCTION TO RETRIEVE INCOMING REQUESTS
                 //console.log(usersFriends['friend'])
 
@@ -56,6 +59,8 @@ export const FriendsList = ({userUID})  => {
                 const usersIncomingFriendRequests = doc.get('incomingFriendRequests')
                 
                 setFirebaseRetrievedFriendRequests(usersIncomingFriendRequests)
+
+                setFirebaseRetrievedChats(usersChats)
 
             })
 
@@ -70,6 +75,7 @@ export const FriendsList = ({userUID})  => {
    
    useEffect(() => {
         console.log(firebaseRetrievedFriends)
+        console.log(firebaseRetrievedChats)
    }, [firebaseRetrievedFriends])
 
    useEffect(() => {
@@ -224,7 +230,7 @@ export const FriendsList = ({userUID})  => {
             <h3>Friends</h3>
 
             <div className='addFriendSearch'>
-            <input type='search' onChange={(e) => setFriendRequestSearchBuffer(e.target.value)}/>
+            <input type='search' onChange={(e) => setFriendRequestSearchBuffer(e.target.value)} placeholder='enter friend code'/>
             <button onClick={pushRequestsData}>Add Friend</button>
             <div id='peopleList'>
                 {firebaseRetrievedPeopleList.map((item, index) => (
@@ -236,12 +242,10 @@ export const FriendsList = ({userUID})  => {
                 ))}
             </div>
             <br/>
-
-            NEED TO HAVE LIVE SEARCH HERE
             
             </div>
 
-            INCOMING FRIEND REQUETSS:
+            <h3>INCOMING FRIEND REQUETSS:</h3>
 
             <div>
                 {firebaseRetrievedFriendRequests && 
@@ -263,7 +267,7 @@ export const FriendsList = ({userUID})  => {
 
                 {firebaseRetrievedFriends && Object.keys(firebaseRetrievedFriends).map((friend, index) => (
                     <div key={index}>
-                        <h5>{firebaseRetrievedFriends[friend]}</h5>
+                        <a href={''}>{firebaseRetrievedFriends[friend]}</a>
                     </div>
                 ))}
 
