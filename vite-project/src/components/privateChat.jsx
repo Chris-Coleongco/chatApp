@@ -319,7 +319,7 @@ export const PrivateChat = () => {
                         )}
                 </div>
                 <div className="absolute inset-x-0 bottom-0 h-16 bg-purple-950">
-                    <input placeholder="type here" onChange={(e) => setMsgToSend(e.target.value)} className="rounded-md" />
+                    need to tset the value here to nothing when the button gets clicked. also need to make it so when u enter while focused in input box you send message (CANNOT MAKE IT SUBMIT VIA FORM IT WILL RELOAD PAGE NO GOODIE)<input placeholder="type here" onChange={(e) => setMsgToSend(e.target.value)} className="rounded-md" />
                     <button onClick={sendMessage} className="rounded-md bg-indigo-800 hover:bg-indigo-600">send</button>
                 </div>
                         
