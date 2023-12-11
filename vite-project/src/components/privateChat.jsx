@@ -25,7 +25,7 @@ const firebaseConfig = {
 const firebase = initializeApp(firebaseConfig);
 const db = getFirestore(firebase);
 
-const PAGE_SIZE = 4
+const PAGE_SIZE = 5
 
 const userUID = { uid: null }
 
@@ -58,6 +58,7 @@ export const PrivateChat = () => {
     //const scrollContainerRef = useRef(null)
 
     //////////////////////////////////////////////////
+      
     const fetchChatData = async () => {
 
         setIsFetchingChatData(true)
@@ -119,6 +120,8 @@ export const PrivateChat = () => {
             //snapshot.forEach((doc) => {
             //   console.log(doc.id, ' => ', doc.data());
             // });
+
+            scrollContainerRef.current.scrollTop = 10
 
             setIsFetchingChatData(false)
         })
@@ -203,22 +206,31 @@ export const PrivateChat = () => {
     }
 
 
-
     const scrollContainerRef = useRef(null);
 
+    
+
+
     useEffect(() => {
+        const container = scrollContainerRef.current;
+
+        container.scrollTop = 20
+        
         const handleScroll = () => {
-          const container = scrollContainerRef.current;
+
+          const scrollTopStatus = container.scrollTop === 0
       
           // Check if the user has scrolled to the top of the container
-          if (container.scrollTop === 0) {
+          if (scrollTopStatus) {
             paginateMagic();
+          } else {
           }
         };
       
         if (scrollContainerRef.current) {
           // Attach the scroll event listener to the container
           scrollContainerRef.current.addEventListener("scroll", handleScroll);
+
         }
       
         return () => {
@@ -227,17 +239,8 @@ export const PrivateChat = () => {
             scrollContainerRef.current.removeEventListener("scroll", handleScroll);
           }
         };
-      }, [scrollContainerRef, paginateMagic]);
-
-
-
-
-
-    const handleScroll = () => {
-        // ! I JUST NEED THIS TO WORK FOR SCROLLING NOT FOR BUTTON CLICK    
-        paginateMagic()
-
-    };
+      }, [paginateMagic]);
+    
 
 
     if (userChatData.length == 0 /*|| scrolledUp == true*/) {
@@ -319,7 +322,7 @@ export const PrivateChat = () => {
                     <input placeholder="type here" onChange={(e) => setMsgToSend(e.target.value)} className="rounded-md" />
                     <button onClick={sendMessage} className="rounded-md bg-indigo-800 hover:bg-indigo-600">send</button>
                 </div>
-                        <button onClick={handleScroll}>click to load older messages</button>
+                        
             </div>
 
         </>
