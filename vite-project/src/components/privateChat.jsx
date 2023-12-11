@@ -25,7 +25,7 @@ const firebaseConfig = {
 const firebase = initializeApp(firebaseConfig);
 const db = getFirestore(firebase);
 
-const PAGE_SIZE = 2
+const PAGE_SIZE = 4
 
 const userUID = { uid: null }
 
@@ -203,6 +203,36 @@ export const PrivateChat = () => {
     }
 
 
+
+    const scrollContainerRef = useRef(null);
+
+    useEffect(() => {
+        const handleScroll = () => {
+          const container = scrollContainerRef.current;
+      
+          // Check if the user has scrolled to the top of the container
+          if (container.scrollTop === 0) {
+            paginateMagic();
+          }
+        };
+      
+        if (scrollContainerRef.current) {
+          // Attach the scroll event listener to the container
+          scrollContainerRef.current.addEventListener("scroll", handleScroll);
+        }
+      
+        return () => {
+          if (scrollContainerRef.current) {
+            // Remove the scroll event listener when the component unmounts
+            scrollContainerRef.current.removeEventListener("scroll", handleScroll);
+          }
+        };
+      }, [scrollContainerRef, paginateMagic]);
+
+
+
+
+
     const handleScroll = () => {
         // ! I JUST NEED THIS TO WORK FOR SCROLLING NOT FOR BUTTON CLICK    
         paginateMagic()
@@ -272,7 +302,7 @@ export const PrivateChat = () => {
                 <h2 className="text-green-500">{chatID}</h2>/* must run on scrollonClick={ }*/
 
 
-                <div className="infinite-scroll-container overflow-y-scroll max-h-96">
+                <div className="infinite-scroll-container overflow-y-scroll max-h-96" ref={scrollContainerRef}>
                     {
                         userChatData.slice().reverse()?.map((msg, index) => {
                             return <div key={msg.id} className="bg-violet-900 text-black pt-1 pb-2 m-4 rounded-md">
