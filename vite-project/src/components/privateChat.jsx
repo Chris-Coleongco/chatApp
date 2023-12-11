@@ -20,26 +20,26 @@ const firebaseConfig = {
     messagingSenderId: "741275514275",
     appId: "1:741275514275:web:bcd112476ae1f91839d616",
     measurementId: "G-97L48GKY1E"
-  };
+};
 
 const firebase = initializeApp(firebaseConfig);
 const db = getFirestore(firebase);
 
-const PAGE_SIZE = 10
+const PAGE_SIZE = 2
 
 const userUID = { uid: null }
 
 
 export const PrivateChat = () => {
-        
+
     const auth = getAuth();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-    
+
     const [isFetchingChatData, setIsFetchingChatData] = useState(false);
 
     const [userHasChatAccess, setUserHasChatAccess] = useState(false)
-    
+
 
     const [loadingAuthStatus, setLoadingAuthStatus] = useState(true)
     const [loadingChatAccessStatus, setLoadingChatAccessStatus] = useState(true)
@@ -48,23 +48,25 @@ export const PrivateChat = () => {
     const [userChatData, setUserChatData] = useState([])
 
     const [msgToSend, setMsgToSend] = useState(null)
-   // console.log(userUID)
+    // console.log(userUID)
 
     const { chatID } = useParams()
     // ! WRAP THIS SO IT ACTIVATES ON CHANGE OF THE PRIVATE CHAT DATA
 
     const [lastVisible, setLastVisible] = useState(null)
 
+    //const scrollContainerRef = useRef(null)
+
     //////////////////////////////////////////////////
     const fetchChatData = async () => {
 
         setIsFetchingChatData(true)
 
-       // console.log(chatID)
-        
+        // console.log(chatID)
+
         const messagesDocRef = doc(db, 'privateMessages', chatID)
 
-       // console.log(messagesDocRef)
+        // console.log(messagesDocRef)
 
         const messagesRef = collection(messagesDocRef, 'messages')
 
@@ -79,7 +81,7 @@ export const PrivateChat = () => {
             //console.log('user should have access')
             setUserHasChatAccess(true)
         } else {
-           //console.log('user unauthorized')
+            //console.log('user unauthorized')
         }
 
         setLoadingChatAccessStatus(false)
@@ -94,13 +96,13 @@ export const PrivateChat = () => {
 
         const unsubscribe = onSnapshot(myQuery, (snapshot) => {
             const paginatedChats = snapshot.docs.map((doc) => doc.data())
-         //   console.log(paginatedChats)
+            //   console.log(paginatedChats)
             if ((paginatedChats.length >= 1) == false) {
                 //console.log('no more data')
                 return unsubscribe;
             }
             else {
-                setUserChatData([...paginatedChats, ...userChatData])
+                setUserChatData([...userChatData, ...paginatedChats])
             }
             // needs to run 
 
@@ -113,12 +115,12 @@ export const PrivateChat = () => {
     orderBy("population"),
     startAfter(lastVisible),
     limit(25));*/
-            
-            //snapshot.forEach((doc) => {
-             //   console.log(doc.id, ' => ', doc.data());
-             // });
 
-             setIsFetchingChatData(false)
+            //snapshot.forEach((doc) => {
+            //   console.log(doc.id, ' => ', doc.data());
+            // });
+
+            setIsFetchingChatData(false)
         })
         return unsubscribe;
     }
@@ -134,15 +136,15 @@ export const PrivateChat = () => {
 
         const currentTime = Timestamp.fromDate(new Date())
 
-        
+
         const privateChatDoc = doc(db, 'privateMessages', chatID)
 
         const messagesCollection = collection(privateChatDoc, 'messages')
 
         addDoc(messagesCollection, {
-            message : msgToSend,
-            sender : userUID.uid,
-            timestamp : currentTime,
+            message: msgToSend,
+            sender: userUID.uid,
+            timestamp: currentTime,
         })
 
 
@@ -155,40 +157,43 @@ export const PrivateChat = () => {
 
 
 
-/* const chatId = 'chat1';
-const messagesRef = collection(doc(db, 'privateMessages', chatId), 'messages');
+    /* const chatId = 'chat1';
+    const messagesRef = collection(doc(db, 'privateMessages', chatId), 'messages');
+    
+    const unsubscribe = onSnapshot(messagesRef, (snapshot) => {
+        snapshot.forEach((doc) => {
+            console.log(doc.id, ' => ', doc.data());
+        });
+    });*/
 
-const unsubscribe = onSnapshot(messagesRef, (snapshot) => {
-    snapshot.forEach((doc) => {
-        console.log(doc.id, ' => ', doc.data());
-    });
-});*/ 
-
-        // ! THIS IS WHERE YOU PUT THE PRIVATE CHAT RETRIEVAL CODE FROM FIREBASE TO PUT IN COMPONENT
-        //! TAKE THE USER UID THEN CD INTO chats IN THE USERSDOC THEN  USE URL PARAM {chatID} TO RETRIEVE DATA FROM FIREBASE
-        //! DONT FORGET TO CHECK IF USER HAS ACCESS TO THE PRIVATE CHAT (user is one of listed members)
+    // ! THIS IS WHERE YOU PUT THE PRIVATE CHAT RETRIEVAL CODE FROM FIREBASE TO PUT IN COMPONENT
+    //! TAKE THE USER UID THEN CD INTO chats IN THE USERSDOC THEN  USE URL PARAM {chatID} TO RETRIEVE DATA FROM FIREBASE
+    //! DONT FORGET TO CHECK IF USER HAS ACCESS TO THE PRIVATE CHAT (user is one of listed members)
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
                 //console.log('user is currently logged in');
-               // console.log(user)
+                // console.log(user)
                 userUID.uid = user.uid
                 setIsAuthenticated(true);
-                
+
             } else {
                 //console.log('no user');
             }
         });
         setLoadingAuthStatus(false)
-     //   console.log('authstatusset')
+        //   console.log('authstatusset')
         return unsubscribe;
     }, [auth]);
 
+
     useEffect(() => {
         console.log(userChatData);
-       // console.log(userHasChatAccess);
+        // console.log(userHasChatAccess);
     }, [userChatData]);
+
+
     const paginateMagic = () => {
         //console.log('paginate')
         if (isFetchingChatData == false) {
@@ -197,81 +202,104 @@ const unsubscribe = onSnapshot(messagesRef, (snapshot) => {
 
     }
 
-    if (userChatData.length == 0) {
+
+    const handleScroll = () => {
+        // ! I JUST NEED THIS TO WORK FOR SCROLLING NOT FOR BUTTON CLICK    
+        paginateMagic()
+
+    };
+
+
+    if (userChatData.length == 0 /*|| scrolledUp == true*/) {
         paginateMagic()
     }
 
-    const firstPostRef = useRef(null)
+    /* 
+     const handleScroll = () => {
+         const container = scrollContainerRef.current
+         const scrollY = container.scrollY;
+ 
+         if (scrollY < 200) {
+             paginateMagic();
+         }
+     };
+ */
+    //useEffect(() => {
+    //   window.addEventListener("scroll", handleScroll);
+    //    return () => window.removeEventListener("scroll", handleScroll);
+    // }, [handleScroll]);
+    /*
+        const firstPostRef = useRef(null)
+    
+        const { ref, entry } = useIntersection({
+            root: firstPostRef.current,
+            threshold: 1
+        })*/
 
-    const {ref, entry} = useIntersection({
-        root: firstPostRef.current,
-        threshold: 1
-    })
-
-    useEffect(() => {
-        if (entry?.isIntersecting) paginateMagic()
-    }, [entry])
+    /* useEffect(() => {
+         if (entry?.isIntersecting) paginateMagic()
+     }, [entry])*/
 
     //console.log(isAuthenticated)
-    //console.log(userHasChatAccess)
-    
- //   console.log(loadingAuthStatus)
-//    console.log(loadingChatAccessStatus)
+    //console.log(userHasChatAccess)=
+
+    //   console.log(loadingAuthStatus)
+    //    console.log(loadingChatAccessStatus)
 
     if (loadingAuthStatus == false && loadingChatAccessStatus == false) {
         console.log('loaidng complete')
 
-       // console.log(isAuthenticated)
-       // console.log(userHasChatAccess)
+        // console.log(isAuthenticated)
+        // console.log(userHasChatAccess)
 
         if (isAuthenticated == false) {
-            return <Navigate to={'/signIn'}/>
+            return <Navigate to={'/signIn'} />
         }
 
         if (userHasChatAccess == false) {
-            return <Navigate to={'/dashboard'}/>
+            return <Navigate to={'/dashboard'} />
         }
 
     }
 
-        return (
-    
-                <>
-                
-                <div>
-                    <SideBar/>
-                    <h2 className="text-white">chat id: </h2>
-                    <h2 className="text-green-500">{ chatID }</h2>/* must run on scrollonClick={}*/
+    return (
 
-                    
-                    <div className="">
-                        {
-                            userChatData.slice().reverse()?.map((msg, index) => {
-                                    return <div key={msg.id} className="bg-violet-900 text-black pt-1 pb-2 m-4 rounded-md">
-                                    <p>Index: {index}</p>
-                                    <p>Message: {msg.message}</p>
-                                    <p>Sender: {msg.sender}</p>
-                                    <p>time: {(msg.timestamp).toDate().toString()}
-                                    </p>
-                                  </div>
-                                }
-                            )}
-                    </div>
-                    <div className="absolute inset-x-0 bottom-0 h-16 bg-purple-950">
-                    <input placeholder="type here" onChange={(e) => setMsgToSend(e.target.value)} className="rounded-md"/>
-                    <button onClick={sendMessage}  className="rounded-md bg-indigo-800 hover:bg-indigo-600">send</button>
-                    </div>
-                
+        <>
+
+            <div>
+                <SideBar />
+                <h2 className="text-white">chat id: </h2>
+                <h2 className="text-green-500">{chatID}</h2>/* must run on scrollonClick={ }*/
+
+
+                <div className="infinite-scroll-container overflow-y-scroll max-h-96">
+                    {
+                        userChatData.slice().reverse()?.map((msg, index) => {
+                            return <div key={msg.id} className="bg-violet-900 text-black pt-1 pb-2 m-4 rounded-md">
+                                <p>Index: {index}</p>
+                                <p>Message: {msg.message}</p>
+                                <p>Sender: {msg.sender}</p>
+                                <p>time: {(msg.timestamp).toDate().toString()}
+                                </p>
+                            </div>
+                        }
+                        )}
                 </div>
-                
-                </>
-                /* {userChatData && 
-                    Object.keys(userChatData).map((data, index) => (
-                        <div key={index}>
-                            <h5>{userChatData[data]}</h5>
-                            <button value={userChatData[data]}>Accept</button>
-                        </div>
-                    ))    
-                } */ 
-            );
-    }
+                <div className="absolute inset-x-0 bottom-0 h-16 bg-purple-950">
+                    <input placeholder="type here" onChange={(e) => setMsgToSend(e.target.value)} className="rounded-md" />
+                    <button onClick={sendMessage} className="rounded-md bg-indigo-800 hover:bg-indigo-600">send</button>
+                </div>
+                        <button onClick={handleScroll}>click to load older messages</button>
+            </div>
+
+        </>
+        /* {userChatData && 
+            Object.keys(userChatData).map((data, index) => (
+                <div key={index}>
+                    <h5>{userChatData[data]}</h5>
+                    <button value={userChatData[data]}>Accept</button>
+                </div>
+            ))    
+        } */
+    );
+}
