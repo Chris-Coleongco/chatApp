@@ -6,9 +6,6 @@ import { setDefaultEventParameters } from 'firebase/analytics';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 // ! import { getStorage, ref } from "firebase/storage";
 
-import { useIntersection } from '@mantine/hooks'
-import { FaBuffer, FaHome, FaPhone, FaUserFriends } from 'react-icons/fa'
-
 import { SideBar } from "./privateChatComponents/sidebar";
 
 
@@ -39,6 +36,8 @@ export const PrivateChat = () => {
     const [isFetchingChatData, setIsFetchingChatData] = useState(false);
 
     const [userHasChatAccess, setUserHasChatAccess] = useState(false)
+
+    const [couldNotAccessUsers, setCouldNotAccessUsers] = useState(false)
 
 
     const [loadingAuthStatus, setLoadingAuthStatus] = useState(true)
@@ -71,9 +70,16 @@ export const PrivateChat = () => {
 
         const messagesRef = collection(messagesDocRef, 'messages')
 
-        const messagesDocUsers = (await getDoc(messagesDocRef)).data().users
+        let messagesDocUsers = '';
 
-        //console.log(messagesDocUsers)
+        try {
+            messagesDocUsers = (await getDoc(messagesDocRef)).data().users
+        } catch (error) {
+            console.log("shit")
+            setCouldNotAccessUsers(true)
+        }
+
+        
 
         //console.log(userUID.uid)
         //console.log(messagesDocUsers)
@@ -158,7 +164,9 @@ export const PrivateChat = () => {
         console.log(Date())
     }, [msgToSend])
 
-
+    useEffect(() => {
+        console.log(couldNotAccessUsers)
+    }, [couldNotAccessUsers])
 
     /* const chatId = 'chat1';
     const messagesRef = collection(doc(db, 'privateMessages', chatId), 'messages');
@@ -279,7 +287,7 @@ export const PrivateChat = () => {
     //   console.log(loadingAuthStatus)
     //    console.log(loadingChatAccessStatus)
 
-    if (loadingAuthStatus == false && loadingChatAccessStatus == false) {
+    if ((loadingAuthStatus == false) && (loadingChatAccessStatus == false || couldNotAccessUsers == true)) {
         console.log('loaidng complete')
 
         // console.log(isAuthenticated)

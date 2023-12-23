@@ -43,12 +43,14 @@ export const Dashboard = () => {
         );
 
     } else {
-
+        console.log(userUID)
+        console.log(typeof userUID)
         return (
             
             <>
-                <SideBar/>
+                <SideBar u={userUID}/>
                 <FriendsList userUID={userUID}/>
+                
             </>
             
         

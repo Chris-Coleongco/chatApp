@@ -153,7 +153,9 @@ export const SignUp = () => {
                     state: selectedState,
                 },
                 friends: {},
-                chats: {}
+                chats: {},
+                pendingFriendRequests: {},
+                incomingFriendRequests: {}
             });
 
             console.log('created documents')
@@ -247,8 +249,6 @@ export const SignUp = () => {
                     onChange={(selectedState) => setSelectedState(selectedState)}
                 //styles={selectStyles}
                 />
-
-                <button type='button' onClick={handleBday}>handleBday</button>
 
                 <button type='submit'>Submit</button>
             </form>

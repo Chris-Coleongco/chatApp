@@ -32,7 +32,7 @@ export const FriendsList = ({userUID})  => {
     const [friendRequestSearchBuffer, setFriendRequestSearchBuffer] = useState("");
 
     // for getting possible users to frined request in live search
-    const [firebaseRetrievedPeopleList, setFirebaseRetrievedPeopleList] = useState([]);
+    const [firebaseRetrievedPeopleDict, setfirebaseRetrievedPeopleDict] = useState({});
 
     const [firebaseRetrievedFriends , setFirebaseRetrievedFriends] = useState({})
 
@@ -51,6 +51,10 @@ export const FriendsList = ({userUID})  => {
 
                 const usersFriends = doc.get('friends')
                 const usersChats = doc.get('chats')
+
+                console.log(usersChats)
+
+                setFirebaseRetrievedChats(usersChats)
                 // ! YOU CAN USE THIS FUNCTION TO RETRIEVE INCOMING REQUESTS
                 //console.log(usersFriends['friend'])
 
@@ -60,7 +64,9 @@ export const FriendsList = ({userUID})  => {
                 
                 setFirebaseRetrievedFriendRequests(usersIncomingFriendRequests)
 
-                setFirebaseRetrievedChats(usersChats)
+                 
+
+                setfirebaseRetrievedPeopleDict(usersChats)
 
             })
 
@@ -88,50 +94,33 @@ export const FriendsList = ({userUID})  => {
 
     const pushRequestsData = async () => {
 
+        console.log('push?')
+
         const usersDoc = doc(db, "users", userUID);
-
+        console.log('push?')
         const personsDoc = doc(db, "users", friendRequestSearchBuffer)
-
+        console.log('push?')
         const existingPersonCheck = await getDoc(personsDoc);
-
-        console.log(typeof existingPersonCheck.data())
-
+        console.log('push?') // ! ERROR IS AT THIS existingPersonCheck
         const existingFriendCheck = await getDoc(doc(usersDoc, "friends", friendRequestSearchBuffer))
-
+        console.log('push?')
         const existingFriendCheckData = existingFriendCheck.data()
 
         const existingPersonCheckData = existingPersonCheck.data()
 
-        console.log(typeof existingFriendCheck.data())
-
-        if (existingFriendCheckData === undefined && existingPersonCheckData !== undefined) {
+        if (existingFriendCheckData === undefined && existingPersonCheckData !== undefined && userUID != friendRequestSearchBuffer) {
 
             //doc(usersDoc, "friends",)
+            console.log('attempting update')
+            await updateDoc(usersDoc, {
+                [`pendingFriendRequests.${friendRequestSearchBuffer}`]: friendRequestSearchBuffer
+            }, { merge: true }) // NEED TO FIX SO DOESNT OVERWRITE PENDINGFRIENDREQUESTS
 
-            try {
-                
-                await updateDoc(usersDoc, {
-                    [`pendingFriendRequests.${friendRequestSearchBuffer}`]: friendRequestSearchBuffer
-                }, { merge: true }) // NEED TO FIX SO DOESNT OVERWRITE PENDINGFRIENDREQUESTS
-            } catch (error) {
-                await setDoc(usersDoc, {
-                    pendingFriendRequests : {
-                        [friendRequestSearchBuffer]: friendRequestSearchBuffer
-                    }
-                })
-            }
-
-            try {
-                await updateDoc(personsDoc, {
-                    [`incomingFriendRequests.${userUID}`]: userUID
-                }, { merge: true }) // NEED TO FIX SO DOESNT OVERWRITE PENDINGFRIENDREQUESTS
-            } catch (error) {
-                await setDoc(personsDoc, {
-                    incomingFriendRequests : {
-                        [userUID]: userUID
-                    }
-                })
-            }
+        
+            await updateDoc(personsDoc, {
+                [`incomingFriendRequests.${userUID}`]: userUID
+            }, { merge: true }) // NEED TO FIX SO DOESNT OVERWRITE PENDINGFRIENDREQUESTS
+        
 
         }
         else {
@@ -164,6 +153,8 @@ export const FriendsList = ({userUID})  => {
 
         if (existingFriendCheckData === undefined) {
 
+            console.log("push?")
+
             const privateChatDoc = await addDoc(collection(db, 'privateMessages' ), {
                 users: {
                     [userUID]: userUID,
@@ -172,8 +163,10 @@ export const FriendsList = ({userUID})  => {
                 
             })
 
-            const privateChatID = privateChatDoc.id
+            console.log("push?")
 
+            const privateChatID = privateChatDoc.id
+            console.log("push?")
             console.log("Document written with ID: ", privateChatDoc.id);
 
 
@@ -182,21 +175,24 @@ export const FriendsList = ({userUID})  => {
             const usersDocSnap = (await getDoc(usersDoc)).data();
             const usersNewFriends = { ...usersDocSnap.friends }
             const usersNewChats = { ...usersDocSnap.chats }
-
-            usersNewChats[privateChatID] = privateChatID
+            console.log("push?")
+            usersNewChats[buttonValue] = privateChatID
             usersNewFriends[buttonValue] = buttonValue
-
+            console.log("push?")
             const personsDocSnap = (await getDoc(personsDoc)).data();
             const personsNewFriends = { ...personsDocSnap.friends }
             const personsNewChats = { ...personsDocSnap.chats }
-
-            personsNewChats[privateChatID] = privateChatID
+            console.log("push?")
+            personsNewChats[userUID] = privateChatID
             personsNewFriends[userUID] = userUID
-    
+            console.log("push?")
+            
             await updateDoc(usersDoc, {
                 friends : usersNewFriends,
                 chats : usersNewChats,
             },  { merge: true })
+
+            console.log("push?")
 
             await updateDoc(personsDoc, {
                 friends : personsNewFriends,
@@ -233,7 +229,7 @@ export const FriendsList = ({userUID})  => {
             <input type='search' onChange={(e) => setFriendRequestSearchBuffer(e.target.value)} placeholder='enter friend code'/>
             <button onClick={pushRequestsData}>Add Friend</button>
             <div id='peopleList'>
-                {firebaseRetrievedPeopleList.map((item, index) => (
+                {firebaseRetrievedPeopleDict.length > 0 && firebaseRetrievedPeopleDict.map((item, index) => (
                     <div key={index}>
 
                         <h5>{item}</h5>
@@ -267,7 +263,7 @@ export const FriendsList = ({userUID})  => {
 
                 {firebaseRetrievedFriends && Object.keys(firebaseRetrievedFriends).map((friend, index) => (
                     <div key={index}>
-                        <a href={''}>{firebaseRetrievedFriends[friend]}</a>
+                        <a href={'/friend/' + firebaseRetrievedChats[friend]}>{firebaseRetrievedFriends[friend]}</a>
                     </div>
                 ))}
 
